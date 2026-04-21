@@ -126,33 +126,26 @@ export const Apartment = () => {
         const xL = cx - W / 2, xR = cx + W / 2;
         const yB = cy - H / 2, yT = cy + H / 2;
         const z = ROOM_HALF + WALL_THICKNESS / 2;
-        const totalW = ROOM_HALF * 2 + WALL_THICKNESS * 2;
         const leftW = xL - (-ROOM_HALF - WALL_THICKNESS);
         const rightW = (ROOM_HALF + WALL_THICKNESS) - xR;
         return (
           <>
-            {/* left of window */}
             <mesh position={[(-ROOM_HALF - WALL_THICKNESS + xL) / 2, ROOM_HEIGHT / 2, z]}>
               <boxGeometry args={[leftW, ROOM_HEIGHT, WALL_THICKNESS]} />
               <meshStandardMaterial map={wallTex} />
             </mesh>
-            {/* right of window */}
             <mesh position={[(xR + ROOM_HALF + WALL_THICKNESS) / 2, ROOM_HEIGHT / 2, z]}>
               <boxGeometry args={[rightW, ROOM_HEIGHT, WALL_THICKNESS]} />
               <meshStandardMaterial map={wallTex} />
             </mesh>
-            {/* below window */}
             <mesh position={[cx, yB / 2, z]}>
               <boxGeometry args={[W, yB, WALL_THICKNESS]} />
               <meshStandardMaterial map={wallTex} />
             </mesh>
-            {/* above window */}
             <mesh position={[cx, (yT + ROOM_HEIGHT) / 2, z]}>
               <boxGeometry args={[W, ROOM_HEIGHT - yT, WALL_THICKNESS]} />
               <meshStandardMaterial map={wallTex} />
             </mesh>
-            {/* unused vars to satisfy linter */}
-            <group visible={false}><mesh><boxGeometry args={[totalW, 0.001, 0.001]} /></mesh></group>
           </>
         );
       })()}
