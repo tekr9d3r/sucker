@@ -559,7 +559,7 @@ export const Apartment = () => {
         </group>
 
         {/* === VCR (on right side of bottom shelf) === */}
-        <group position={[0.7, 0.5, 0.05]}>
+        <group position={[0.7, 0.75, 0.05]}>
           <mesh castShadow>
             <boxGeometry args={[1.0, 0.16, 0.55]} />
             <meshStandardMaterial color="#1a1a1a" roughness={0.5} />
@@ -589,7 +589,7 @@ export const Apartment = () => {
         </group>
 
         {/* === Vinyl turntable (on top of cabinet, left side) === */}
-        <group position={[-1.0, 0.86, 0]}>
+        <group position={[-1.0, 1.12, 0]}>
           {/* Plinth */}
           <mesh castShadow>
             <boxGeometry args={[1.1, 0.08, 0.75]} />
@@ -628,7 +628,7 @@ export const Apartment = () => {
         </group>
 
         {/* === TV — sits ON TOP of cabinet, screen faces -Z (toward player) === */}
-        <group position={[0.5, 1.55, 0]}>
+        <group position={[0.5, 1.95, 0]}>
           {/* Bezel: outer frame, thin */}
           <mesh castShadow>
             <boxGeometry args={[2.6, 1.55, 0.1]} />
@@ -657,7 +657,7 @@ export const Apartment = () => {
         </group>
 
         {/* Screen glow */}
-        <pointLight position={[0.5, 1.55, -0.6]} intensity={0.45} color="#9ec5ff" distance={4} />
+        <pointLight position={[0.5, 1.95, -0.6]} intensity={0.45} color="#9ec5ff" distance={4} />
       </group>
 
       {/* Bookshelf on left wall — richly detailed */}
