@@ -6,7 +6,7 @@ import { useGameStore } from "./useGameStore";
 import catFurUrl from "@/assets/cat-fur.jpg";
 
 interface Props {
-  playerRef: React.MutableRefObject<{ x: number; z: number }>;
+  playerRef: React.MutableRefObject<{ x: number; z: number; yaw?: number }>;
 }
 
 const CAT_RADIUS = 0.35;

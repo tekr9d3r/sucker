@@ -17,7 +17,7 @@ const isCellBlocked = (cx: number, cz: number) => {
 };
 
 interface Props {
-  playerRef: React.MutableRefObject<{ x: number; z: number }>;
+  playerRef: React.MutableRefObject<{ x: number; z: number; yaw?: number }>;
   active: boolean;
 }
 
@@ -112,6 +112,10 @@ export const DirtField = ({ playerRef, active }: Props) => {
     if (!mesh) return;
     const px = playerRef.current.x;
     const pz = playerRef.current.z;
+    const yaw = playerRef.current.yaw ?? 0;
+    // Forward direction (matches Roomba.tsx: dx = -sin(yaw), dz = -cos(yaw))
+    const fx = -Math.sin(yaw);
+    const fz = -Math.cos(yaw);
     const r = ROOMBA_RADIUS;
     const r2 = r * r;
 
@@ -129,6 +133,9 @@ export const DirtField = ({ playerRef, active }: Props) => {
         const dx = cx - px;
         const dz = cz - pz;
         if (dx * dx + dz * dz > r2) continue;
+        // Only clean cells behind the vacuum (dot product with forward < small threshold)
+        // so the visible shine appears as a trail, never poking out in front of camera.
+        if (dx * fx + dz * fz > 0.05) continue;
         const instanceIdx = idxMapRef.current.get(iz * GRID + ix);
         if (instanceIdx === undefined) continue;
         if (cleanedRef.current[instanceIdx]) continue;

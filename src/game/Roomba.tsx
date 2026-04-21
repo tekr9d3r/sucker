@@ -6,7 +6,7 @@ import { useGameStore } from "./useGameStore";
 import { playThud, setSuctionIntensity } from "./audio";
 
 interface Props {
-  playerRef: React.MutableRefObject<{ x: number; z: number }>;
+  playerRef: React.MutableRefObject<{ x: number; z: number; yaw?: number }>;
   onShake: (intensity: number) => void;
 }
 
@@ -104,6 +104,7 @@ export const Roomba = ({ playerRef, onShake }: Props) => {
     camera.rotation.set(0, yaw, tiltRef.current);
     camera.up.set(0, 1, 0);
 
+    playerRef.current.yaw = yaw;
     setPlayer(x, z, yaw);
 
     const rate = (window as unknown as { __cleaningRate?: number }).__cleaningRate ?? 0;

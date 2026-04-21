@@ -120,21 +120,69 @@ export const Apartment = () => {
         <meshStandardMaterial map={wallTex} />
       </mesh>
 
-      {/* South wall */}
-      <mesh position={[0, ROOM_HEIGHT / 2, ROOM_HALF + WALL_THICKNESS / 2]}>
-        <boxGeometry args={[ROOM_HALF * 2 + WALL_THICKNESS * 2, ROOM_HEIGHT, WALL_THICKNESS]} />
-        <meshStandardMaterial map={wallTex} />
-      </mesh>
+      {/* South wall — split into 4 segments around window at x=5, width 2.5, y 0.65–2.25 */}
+      {(() => {
+        const W = 2.5, H = 1.6, cx = 5, cy = 1.45;
+        const xL = cx - W / 2, xR = cx + W / 2;
+        const yB = cy - H / 2, yT = cy + H / 2;
+        const z = ROOM_HALF + WALL_THICKNESS / 2;
+        const leftW = xL - (-ROOM_HALF - WALL_THICKNESS);
+        const rightW = (ROOM_HALF + WALL_THICKNESS) - xR;
+        return (
+          <>
+            <mesh position={[(-ROOM_HALF - WALL_THICKNESS + xL) / 2, ROOM_HEIGHT / 2, z]}>
+              <boxGeometry args={[leftW, ROOM_HEIGHT, WALL_THICKNESS]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            <mesh position={[(xR + ROOM_HALF + WALL_THICKNESS) / 2, ROOM_HEIGHT / 2, z]}>
+              <boxGeometry args={[rightW, ROOM_HEIGHT, WALL_THICKNESS]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            <mesh position={[cx, yB / 2, z]}>
+              <boxGeometry args={[W, yB, WALL_THICKNESS]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            <mesh position={[cx, (yT + ROOM_HEIGHT) / 2, z]}>
+              <boxGeometry args={[W, ROOM_HEIGHT - yT, WALL_THICKNESS]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+          </>
+        );
+      })()}
       {/* West wall */}
       <mesh position={[-ROOM_HALF - WALL_THICKNESS / 2, ROOM_HEIGHT / 2, 0]}>
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_HALF * 2]} />
         <meshStandardMaterial map={wallTex} />
       </mesh>
-      {/* East wall */}
-      <mesh position={[ROOM_HALF + WALL_THICKNESS / 2, ROOM_HEIGHT / 2, 0]}>
-        <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_HALF * 2]} />
-        <meshStandardMaterial map={wallTex} />
-      </mesh>
+      {/* East wall — split into 4 segments around window at z=3, width 3.5, y 0.55–2.35 */}
+      {(() => {
+        const W = 3.5, H = 1.8, cz = 3, cy = 1.45;
+        const zN = cz - W / 2, zS = cz + W / 2;
+        const yB = cy - H / 2, yT = cy + H / 2;
+        const x = ROOM_HALF + WALL_THICKNESS / 2;
+        const northW = zN - (-ROOM_HALF);
+        const southW = ROOM_HALF - zS;
+        return (
+          <>
+            <mesh position={[x, ROOM_HEIGHT / 2, (-ROOM_HALF + zN) / 2]}>
+              <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, northW]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            <mesh position={[x, ROOM_HEIGHT / 2, (zS + ROOM_HALF) / 2]}>
+              <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, southW]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            <mesh position={[x, yB / 2, cz]}>
+              <boxGeometry args={[WALL_THICKNESS, yB, W]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            <mesh position={[x, (yT + ROOM_HEIGHT) / 2, cz]}>
+              <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT - yT, W]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+          </>
+        );
+      })()}
 
       {/* DOOR — wooden, in the opening */}
       <group position={[doorCenterX, 0, -ROOM_HALF + 0.05]}>
@@ -214,6 +262,22 @@ export const Apartment = () => {
           <boxGeometry args={[0.55, 0.4, 0.25]} />
           <meshStandardMaterial color="#3e6b3e" />
         </mesh>
+        {/* Knitted throw blanket draped over right armrest */}
+        <mesh position={[2.1, 0.78, 0.3]} rotation={[0.2, 0.1, 0]} castShadow>
+          <boxGeometry args={[1.2, 0.05, 0.9]} />
+          <meshStandardMaterial color="#b85c4a" roughness={1} />
+        </mesh>
+        <mesh position={[2.45, 0.55, 0.55]} rotation={[0, 0, 0.3]} castShadow>
+          <boxGeometry args={[0.5, 0.5, 0.05]} />
+          <meshStandardMaterial color="#b85c4a" roughness={1} />
+        </mesh>
+        {/* Wooden sofa legs */}
+        {[-2.4, -0.8, 0.8, 2.4].map((lx, i) => (
+          <mesh key={`sleg-${i}`} position={[lx, 0.05, 0.5]}>
+            <boxGeometry args={[0.1, 0.1, 0.1]} />
+            <meshStandardMaterial color="#3a2515" />
+          </mesh>
+        ))}
       </group>
 
       {/* Side table next to sofa with lamp */}
@@ -250,13 +314,41 @@ export const Apartment = () => {
             <meshStandardMaterial color={tableColor} />
           </mesh>
         ))}
+        {/* Stack of magazines */}
         <mesh position={[-0.6, 0.6, -0.3]} castShadow>
           <boxGeometry args={[0.8, 0.08, 0.55]} />
           <meshStandardMaterial color="#8b2e2e" />
         </mesh>
+        <mesh position={[-0.55, 0.66, -0.28]} rotation={[0, 0.15, 0]} castShadow>
+          <boxGeometry args={[0.75, 0.04, 0.5]} />
+          <meshStandardMaterial color="#2e4a8b" />
+        </mesh>
+        <mesh position={[-0.62, 0.7, -0.32]} rotation={[0, -0.1, 0]} castShadow>
+          <boxGeometry args={[0.7, 0.03, 0.48]} />
+          <meshStandardMaterial color="#e6c547" />
+        </mesh>
+        {/* Coffee mug */}
         <mesh position={[0.7, 0.62, 0.2]} castShadow>
           <cylinderGeometry args={[0.09, 0.075, 0.14, 16]} />
           <meshStandardMaterial color="#ffffff" />
+        </mesh>
+        <mesh position={[0.79, 0.62, 0.2]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <torusGeometry args={[0.05, 0.012, 8, 16, Math.PI]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+        {/* Small succulent in clay pot */}
+        <mesh position={[1.1, 0.6, -0.6]} castShadow>
+          <cylinderGeometry args={[0.1, 0.08, 0.18, 12]} />
+          <meshStandardMaterial color="#a85a30" roughness={0.8} />
+        </mesh>
+        <mesh position={[1.1, 0.78, -0.6]} castShadow>
+          <sphereGeometry args={[0.13, 12, 12]} />
+          <meshStandardMaterial color="#5a8a4a" />
+        </mesh>
+        {/* Remote control */}
+        <mesh position={[0.2, 0.555, -0.5]} rotation={[0, 0.4, 0]} castShadow>
+          <boxGeometry args={[0.18, 0.03, 0.45]} />
+          <meshStandardMaterial color="#1a1a1a" />
         </mesh>
       </group>
 
@@ -289,6 +381,37 @@ export const Apartment = () => {
           <sphereGeometry args={[0.07, 12, 12]} />
           <meshStandardMaterial color="#e6a428" />
         </mesh>
+        {/* Linen table runner */}
+        <mesh position={[0, 0.905, 0]}>
+          <boxGeometry args={[0.7, 0.005, 3.8]} />
+          <meshStandardMaterial color="#e8d8b8" roughness={1} />
+        </mesh>
+        {/* Two place settings — plates */}
+        {[-1.3, 1.3].map((pz, i) => (
+          <group key={`plate-${i}`} position={[0, 0.91, pz]}>
+            <mesh castShadow>
+              <cylinderGeometry args={[0.22, 0.22, 0.015, 24]} />
+              <meshStandardMaterial color="#fafafa" roughness={0.4} />
+            </mesh>
+            <mesh position={[0, 0.012, 0]}>
+              <cylinderGeometry args={[0.12, 0.12, 0.005, 24]} />
+              <meshStandardMaterial color="#e8e2d0" />
+            </mesh>
+          </group>
+        ))}
+        {/* Wine glass */}
+        <mesh position={[0.5, 1.05, 1.1]} castShadow>
+          <cylinderGeometry args={[0.05, 0.04, 0.18, 12]} />
+          <meshPhysicalMaterial color="#ffffff" transparent opacity={0.3} transmission={0.9} roughness={0.05} />
+        </mesh>
+        <mesh position={[0.5, 0.94, 1.1]}>
+          <cylinderGeometry args={[0.005, 0.005, 0.06, 8]} />
+          <meshStandardMaterial color="#cccccc" />
+        </mesh>
+        <mesh position={[0.5, 0.91, 1.1]}>
+          <cylinderGeometry args={[0.05, 0.05, 0.005, 12]} />
+          <meshStandardMaterial color="#cccccc" />
+        </mesh>
       </group>
 
       {/* Chairs */}
@@ -300,6 +423,11 @@ export const Apartment = () => {
           <mesh position={[0, 0.45, 0]} castShadow>
             <boxGeometry args={[1.2, 0.1, 0.9]} />
             <meshStandardMaterial color={chairColor} />
+          </mesh>
+          {/* Cushion */}
+          <mesh position={[0, 0.53, 0]} castShadow>
+            <boxGeometry args={[1.1, 0.08, 0.8]} />
+            <meshStandardMaterial color="#d4b896" roughness={1} />
           </mesh>
           {[
             [-0.5, -0.4] as const,
@@ -316,6 +444,13 @@ export const Apartment = () => {
             <boxGeometry args={[1.2, 0.9, 0.08]} />
             <meshStandardMaterial color={chairColor} />
           </mesh>
+          {/* Spindle slats on backrest */}
+          {[-0.3, 0, 0.3].map((sx, j) => (
+            <mesh key={`slat-${j}`} position={[sx, 0.95, c.faceZ * 0.36]}>
+              <cylinderGeometry args={[0.025, 0.025, 0.85, 8]} />
+              <meshStandardMaterial color={chairColor} />
+            </mesh>
+          ))}
         </group>
       ))}
 
@@ -373,27 +508,75 @@ export const Apartment = () => {
         )}
       </group>
 
-      {/* Potted plant */}
+      {/* Potted fiddle-leaf fig in corner */}
       <group position={[7, 0, -7]}>
         <mesh position={[0, 0.4, 0]} castShadow>
           <cylinderGeometry args={[0.45, 0.35, 0.8, 16]} />
-          <meshStandardMaterial color={plantPotColor} roughness={0.7} />
+          <meshStandardMaterial color={plantPotColor} roughness={0.85} />
         </mesh>
-        <mesh position={[0, 0.8, 0]}>
-          <cylinderGeometry args={[0.42, 0.42, 0.05, 16]} />
-          <meshStandardMaterial color="#3a2515" />
+        <mesh position={[0, 0.78, 0]}>
+          <cylinderGeometry args={[0.48, 0.45, 0.06, 16]} />
+          <meshStandardMaterial color="#8a4a26" roughness={0.85} />
         </mesh>
-        <mesh position={[0, 1.3, 0]} castShadow>
-          <sphereGeometry args={[0.55, 16, 16]} />
-          <meshStandardMaterial color={plantLeafColor} />
+        <mesh position={[0, 0.81, 0]}>
+          <cylinderGeometry args={[0.42, 0.42, 0.04, 16]} />
+          <meshStandardMaterial color="#2a1a10" roughness={1} />
         </mesh>
-        <mesh position={[0.3, 1.6, 0.1]} castShadow>
-          <sphereGeometry args={[0.4, 12, 12]} />
-          <meshStandardMaterial color="#4d8a4d" />
+        {/* Trunk */}
+        <mesh position={[0, 1.1, 0]} castShadow>
+          <cylinderGeometry args={[0.04, 0.06, 0.6, 8]} />
+          <meshStandardMaterial color="#6b4a2a" />
         </mesh>
-        <mesh position={[-0.25, 1.55, -0.1]} castShadow>
-          <sphereGeometry args={[0.35, 12, 12]} />
-          <meshStandardMaterial color="#356b35" />
+        {/* Leaves */}
+        {[
+          { p: [0, 1.5, 0.25] as [number, number, number], r: [0.1, 0, 0.2] as [number, number, number], s: 0.45 },
+          { p: [0.25, 1.6, -0.15] as [number, number, number], r: [-0.2, 0.5, -0.3] as [number, number, number], s: 0.4 },
+          { p: [-0.2, 1.7, 0.1] as [number, number, number], r: [0.1, -0.4, 0.4] as [number, number, number], s: 0.42 },
+          { p: [0.15, 1.85, 0.2] as [number, number, number], r: [-0.3, 0.2, -0.2] as [number, number, number], s: 0.38 },
+          { p: [-0.15, 2.0, -0.2] as [number, number, number], r: [0.2, -0.6, 0.3] as [number, number, number], s: 0.4 },
+          { p: [0.05, 2.15, 0.15] as [number, number, number], r: [-0.4, 0.3, 0] as [number, number, number], s: 0.36 },
+        ].map((l, i) => (
+          <mesh key={`leaf-${i}`} position={l.p} rotation={l.r} castShadow>
+            <sphereGeometry args={[l.s, 12, 8]} />
+            <meshStandardMaterial color={i % 2 === 0 ? plantLeafColor : "#4d8a4d"} roughness={0.7} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Floor lamp by sofa corner */}
+      <group position={[-7, 0, -5]}>
+        <mesh position={[0, 0.05, 0]}>
+          <cylinderGeometry args={[0.25, 0.3, 0.05, 16]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        <mesh position={[0, 0.85, 0]}>
+          <cylinderGeometry args={[0.02, 0.02, 1.6, 8]} />
+          <meshStandardMaterial color="#1a1a1a" metalness={0.7} roughness={0.4} />
+        </mesh>
+        <mesh position={[0, 1.7, 0]} castShadow>
+          <cylinderGeometry args={[0.18, 0.28, 0.4, 16]} />
+          <meshStandardMaterial color="#fff5d6" emissive="#ffd88a" emissiveIntensity={0.4} roughness={0.9} />
+        </mesh>
+        <pointLight position={[0, 1.7, 0]} intensity={0.35} color="#ffd88a" distance={5} />
+      </group>
+
+      {/* Wall clock on south wall */}
+      <group position={[-3, 2.3, ROOM_HALF - 0.06]} rotation={[0, Math.PI, 0]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.3, 0.3, 0.04, 24]} />
+          <meshStandardMaterial color="#2a2018" />
+        </mesh>
+        <mesh position={[0, 0, 0.025]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.27, 0.27, 0.005, 24]} />
+          <meshStandardMaterial color="#fafafa" />
+        </mesh>
+        <mesh position={[0.05, 0.04, 0.04]} rotation={[0, 0, -0.4]}>
+          <boxGeometry args={[0.16, 0.02, 0.005]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        <mesh position={[0, 0.1, 0.04]} rotation={[0, 0, 0.2]}>
+          <boxGeometry args={[0.02, 0.22, 0.005]} />
+          <meshStandardMaterial color="#1a1a1a" />
         </mesh>
       </group>
 
@@ -410,15 +593,6 @@ export const Apartment = () => {
         color="#fff0c8"
         target-position={[0, 0, 0]}
       />
-      {/* Sunlight pool on floor near east window — subtle warm patch */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[5, 0.012, 3]}>
-        <planeGeometry args={[3, 4]} />
-        <meshBasicMaterial color="#ffe8b0" transparent opacity={0.18} blending={THREE.AdditiveBlending} />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[5, 0.012, 6.5]}>
-        <planeGeometry args={[2.5, 2.5]} />
-        <meshBasicMaterial color="#ffe8b0" transparent opacity={0.14} blending={THREE.AdditiveBlending} />
-      </mesh>
     </group>
   );
 };
@@ -433,11 +607,36 @@ interface WindowProps {
 const Window = ({ position, rotation, width, height, tex }: WindowProps) => {
   const halfW = width / 2;
   const halfH = height / 2;
+  // Aspect-correct city scene: scale a much LARGER backdrop and push it
+  // far outside the wall so it parallaxes like a real distant view.
+  const sceneScale = 3.0;
+  const sceneW = width * sceneScale;
+  const sceneH = height * sceneScale;
   return (
     <group position={position} rotation={rotation}>
-      <mesh position={[0, 0, -0.18]}>
-        <planeGeometry args={[width, height]} />
+      {/* Distant city backdrop — pushed far behind glass, oversized for parallax */}
+      <mesh position={[0, 0, -6]}>
+        <planeGeometry args={[sceneW, sceneH]} />
         <meshBasicMaterial map={tex} toneMapped={false} />
+      </mesh>
+      {/* Soft sky-blue tint behind everything in case backdrop edges show */}
+      <mesh position={[0, 0, -6.2]}>
+        <planeGeometry args={[sceneW * 1.5, sceneH * 1.5]} />
+        <meshBasicMaterial color="#b8d8ee" toneMapped={false} />
+      </mesh>
+      {/* Glass pane — slight blue tint, transparent, subtle reflection feel */}
+      <mesh position={[0, 0, 0]}>
+        <planeGeometry args={[width, height]} />
+        <meshPhysicalMaterial
+          color="#dbeefb"
+          transparent
+          opacity={0.18}
+          roughness={0.05}
+          metalness={0}
+          transmission={0.9}
+          thickness={0.05}
+          ior={1.45}
+        />
       </mesh>
       {/* Frame */}
       <mesh position={[0, halfH + 0.07, 0]}>
@@ -456,24 +655,19 @@ const Window = ({ position, rotation, width, height, tex }: WindowProps) => {
         <boxGeometry args={[0.14, height + 0.3, 0.1]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
-      {/* Mullions */}
-      <mesh position={[0, 0, 0.01]}>
-        <boxGeometry args={[0.05, height, 0.05]} />
+      {/* Mullions — slim cross dividing the glass */}
+      <mesh position={[0, 0, 0.02]}>
+        <boxGeometry args={[0.04, height, 0.04]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
-      <mesh position={[0, 0, 0.01]}>
-        <boxGeometry args={[width, 0.05, 0.05]} />
+      <mesh position={[0, 0, 0.02]}>
+        <boxGeometry args={[width, 0.04, 0.04]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
       {/* Sill */}
       <mesh position={[0, -halfH - 0.13, 0.18]}>
         <boxGeometry args={[width + 0.4, 0.07, 0.3]} />
         <meshStandardMaterial color="#f5f5f5" />
-      </mesh>
-      {/* Sun glow */}
-      <mesh position={[0, 0, 0.04]}>
-        <planeGeometry args={[width, height]} />
-        <meshBasicMaterial color="#fff4d0" transparent opacity={0.08} />
       </mesh>
     </group>
   );
