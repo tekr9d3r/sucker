@@ -46,7 +46,7 @@ export const Apartment = () => {
   const doorHeight = 2.1;
 
   return (
-    <group>
+    <group scale={[WORLD_SCALE, 1, WORLD_SCALE]}>
       {/* Floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[ROOM_HALF * 2, ROOM_HALF * 2]} />
