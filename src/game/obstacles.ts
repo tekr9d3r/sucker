@@ -1,5 +1,4 @@
 // AABB obstacles for collision. y is ignored — Roomba is on the floor.
-// Obstacles with `clearance` allow the Roomba to drive UNDER them (e.g. table tops).
 export interface AABB {
   minX: number;
   maxX: number;
@@ -7,54 +6,75 @@ export interface AABB {
   maxZ: number;
 }
 
-export const ROOM_HALF = 13; // 26x26 room — more apartment-like
-export const ROOM_HEIGHT = 2.7; // realistic ceiling
+export const ROOM_HALF = 8; // 16x16 room — cozier
+export const ROOM_HEIGHT = 2.7;
 export const WALL_THICKNESS = 0.3;
 export const ROOMBA_RADIUS = 0.4;
 
+// Door opening on north wall (z = -ROOM_HALF). Opening centered at x=4, width 1.6
+export const DOOR_X_MIN = 3.2;
+export const DOOR_X_MAX = 4.8;
+
 // Solid obstacles (Roomba cannot pass)
 export const SOLID_OBSTACLES: AABB[] = [
-  // Sofa (back wall, big L-shape main piece)
-  { minX: -10, maxX: -3, minZ: -12.5, maxZ: -10.7 },
-  // Sofa armrests
-  { minX: -10.4, maxX: -10, minZ: -12.5, maxZ: -10.5 },
-  { minX: -3, maxX: -2.6, minZ: -12.5, maxZ: -10.5 },
-  // TV stand (opposite wall)
-  { minX: -4, maxX: 4, minZ: 11.5, maxZ: 12.5 },
+  // Sofa
+  { minX: -7, maxX: -2, minZ: -7.5, maxZ: -6.2 },
+  { minX: -7.4, maxX: -7, minZ: -7.5, maxZ: -6 },
+  { minX: -2, maxX: -1.6, minZ: -7.5, maxZ: -6 },
+  // TV stand
+  { minX: -3, maxX: 3, minZ: 6.8, maxZ: 7.5 },
   // Bookshelf (left wall)
-  { minX: -12.5, maxX: -11.6, minZ: -2, maxZ: 4 },
+  { minX: -7.5, maxX: -6.9, minZ: 0, maxZ: 4 },
   // Side table next to sofa
-  { minX: -2, maxX: -1.2, minZ: -12.2, maxZ: -11.4 },
-  // Potted plant (corner)
-  { minX: 11.4, maxX: 12.6, minZ: -12.4, maxZ: -11.2 },
-  // Floor lamp (corner near TV)
-  { minX: 11.4, maxX: 12, minZ: 10.5, maxZ: 11.1 },
-  // Coffee table legs (4 cylinders, in front of sofa)
-  { minX: -8.3, maxX: -7.9, minZ: -8.3, maxZ: -7.9 },
-  { minX: -4.1, maxX: -3.7, minZ: -8.3, maxZ: -7.9 },
-  { minX: -8.3, maxX: -7.9, minZ: -5.3, maxZ: -4.9 },
-  { minX: -4.1, maxX: -3.7, minZ: -5.3, maxZ: -4.9 },
+  { minX: -1.2, maxX: -0.5, minZ: -7.3, maxZ: -6.6 },
+  // Plant in corner
+  { minX: 6.5, maxX: 7.4, minZ: -7.4, maxZ: -6.5 },
+  // Coffee table legs
+  { minX: -5.3, maxX: -4.95, minZ: -4.8, maxZ: -4.45 },
+  { minX: -3.05, maxX: -2.7, minZ: -4.8, maxZ: -4.45 },
+  { minX: -5.3, maxX: -4.95, minZ: -2.95, maxZ: -2.6 },
+  { minX: -3.05, maxX: -2.7, minZ: -2.95, maxZ: -2.6 },
   // Dining table legs (right side)
-  { minX: 5.7, maxX: 6.1, minZ: -2.3, maxZ: -1.9 },
-  { minX: 9.4, maxX: 9.8, minZ: -2.3, maxZ: -1.9 },
-  { minX: 5.7, maxX: 6.1, minZ: 3.4, maxZ: 3.8 },
-  { minX: 9.4, maxX: 9.8, minZ: 3.4, maxZ: 3.8 },
-  // Chairs (solid base)
-  { minX: 7, maxX: 8.5, minZ: -4.2, maxZ: -3 },
-  { minX: 7, maxX: 8.5, minZ: 4.5, maxZ: 5.7 },
+  { minX: 3.7, maxX: 4.0, minZ: -1.5, maxZ: -1.2 },
+  { minX: 6.0, maxX: 6.3, minZ: -1.5, maxZ: -1.2 },
+  { minX: 3.7, maxX: 4.0, minZ: 1.7, maxZ: 2.0 },
+  { minX: 6.0, maxX: 6.3, minZ: 1.7, maxZ: 2.0 },
+  // Chairs
+  { minX: 4.4, maxX: 5.6, minZ: -2.7, maxZ: -1.8 },
+  { minX: 4.4, maxX: 5.6, minZ: 2.0, maxZ: 2.9 },
 ];
 
-// Walls (4)
+// Walls — split north wall into two segments to leave a door opening
 export const WALLS: AABB[] = [
-  { minX: -ROOM_HALF - WALL_THICKNESS, maxX: ROOM_HALF + WALL_THICKNESS, minZ: -ROOM_HALF - WALL_THICKNESS, maxZ: -ROOM_HALF },
-  { minX: -ROOM_HALF - WALL_THICKNESS, maxX: ROOM_HALF + WALL_THICKNESS, minZ: ROOM_HALF, maxZ: ROOM_HALF + WALL_THICKNESS },
+  // North wall left segment (from -ROOM_HALF to DOOR_X_MIN)
+  {
+    minX: -ROOM_HALF - WALL_THICKNESS,
+    maxX: DOOR_X_MIN,
+    minZ: -ROOM_HALF - WALL_THICKNESS,
+    maxZ: -ROOM_HALF,
+  },
+  // North wall right segment (from DOOR_X_MAX to +ROOM_HALF)
+  {
+    minX: DOOR_X_MAX,
+    maxX: ROOM_HALF + WALL_THICKNESS,
+    minZ: -ROOM_HALF - WALL_THICKNESS,
+    maxZ: -ROOM_HALF,
+  },
+  // South wall
+  {
+    minX: -ROOM_HALF - WALL_THICKNESS,
+    maxX: ROOM_HALF + WALL_THICKNESS,
+    minZ: ROOM_HALF,
+    maxZ: ROOM_HALF + WALL_THICKNESS,
+  },
+  // West wall
   { minX: -ROOM_HALF - WALL_THICKNESS, maxX: -ROOM_HALF, minZ: -ROOM_HALF, maxZ: ROOM_HALF },
+  // East wall
   { minX: ROOM_HALF, maxX: ROOM_HALF + WALL_THICKNESS, minZ: -ROOM_HALF, maxZ: ROOM_HALF },
 ];
 
 const ALL: AABB[] = [...WALLS, ...SOLID_OBSTACLES];
 
-// Returns corrected (x, z) after collision resolution and whether a collision occurred.
 export const resolveCollision = (
   oldX: number,
   oldZ: number,
@@ -66,7 +86,6 @@ export const resolveCollision = (
   let hit = false;
   const r = ROOMBA_RADIUS;
 
-  // Try X movement
   for (const b of ALL) {
     if (x + r > b.minX && x - r < b.maxX && oldZ + r > b.minZ && oldZ - r < b.maxZ) {
       x = oldX;
@@ -74,7 +93,6 @@ export const resolveCollision = (
       break;
     }
   }
-  // Try Z movement
   for (const b of ALL) {
     if (x + r > b.minX && x - r < b.maxX && z + r > b.minZ && z - r < b.maxZ) {
       z = oldZ;
@@ -83,4 +101,27 @@ export const resolveCollision = (
     }
   }
   return { x, z, hit };
+};
+
+// Check if a point is inside any solid obstacle (used by cat AI)
+export const isPointBlocked = (x: number, z: number, padding = 0.3): boolean => {
+  if (
+    x < -ROOM_HALF + padding ||
+    x > ROOM_HALF - padding ||
+    z < -ROOM_HALF + padding ||
+    z > ROOM_HALF - padding
+  ) {
+    return true;
+  }
+  for (const b of SOLID_OBSTACLES) {
+    if (
+      x + padding > b.minX &&
+      x - padding < b.maxX &&
+      z + padding > b.minZ &&
+      z - padding < b.maxZ
+    ) {
+      return true;
+    }
+  }
+  return false;
 };

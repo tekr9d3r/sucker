@@ -14,6 +14,8 @@ const formatTime = (ms: number): string => {
 export const CompleteScreen = () => {
   const status = useGameStore((s) => s.status);
   const elapsedMs = useGameStore((s) => s.elapsedMs);
+  const damageMs = useGameStore((s) => s.damageMs);
+  const damage = useGameStore((s) => s.damage);
   const bestMs = useGameStore((s) => s.bestMs);
   const reset = useGameStore((s) => s.reset);
   const start = useGameStore((s) => s.start);
@@ -30,7 +32,8 @@ export const CompleteScreen = () => {
 
   if (status !== "complete") return null;
 
-  const isNewBest = bestMs !== null && elapsedMs <= bestMs;
+  const finalMs = elapsedMs + damageMs;
+  const isNewBest = bestMs !== null && finalMs <= bestMs;
 
   const handleReplay = async () => {
     await resumeAudio();
@@ -49,10 +52,18 @@ export const CompleteScreen = () => {
         <div className="mb-4 rounded-lg bg-white/5 p-6">
           <div className="text-xs uppercase tracking-widest text-white/60">Final Time</div>
           <div className="font-mono text-5xl font-bold text-white tabular-nums">
-            {formatTime(elapsedMs)}
+            {formatTime(finalMs)}
           </div>
+          {damageMs > 0 && (
+            <div className="mt-2 text-xs text-white/60 space-y-0.5">
+              <div>Run time: <span className="font-mono">{formatTime(elapsedMs)}</span></div>
+              <div className="text-red-400">
+                Damage penalty: <span className="font-mono">+{(damageMs / 1000).toFixed(1)}s</span> ({Math.round(damage)}%)
+              </div>
+            </div>
+          )}
           {isNewBest && (
-            <div className="mt-2 text-sm font-semibold text-amber-300">🏆 New personal best!</div>
+            <div className="mt-3 text-sm font-semibold text-amber-300">🏆 New personal best!</div>
           )}
           {!isNewBest && bestMs !== null && (
             <div className="mt-2 text-xs text-white/50">
