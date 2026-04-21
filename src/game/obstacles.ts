@@ -6,19 +6,26 @@ export interface AABB {
   maxZ: number;
 }
 
-// World scaling: shrink the whole apartment by this factor (visual + collisions)
-// keeps the same furniture layout but makes the room cozier.
+// World scaling: shrink room footprint (X/Z) by this factor while keeping
+// ceiling height in world units. Apartment.tsx wraps its visuals in a
+// <group scale={[WORLD_SCALE, 1, WORLD_SCALE]}> so we keep raw unscaled coords
+// inside Apartment and scale collision bounds here.
 export const WORLD_SCALE = 0.7;
 const _S = WORLD_SCALE;
 
-export const ROOM_HALF = 8 * _S; // shrunk room
-export const ROOM_HEIGHT = 3.6; // taller ceiling
+// Raw (unscaled) room footprint used inside the scaled apartment group
+export const RAW_ROOM_HALF = 8;
+// Scaled (world) room footprint used by physics, AI, dirt grid
+export const ROOM_HALF = RAW_ROOM_HALF * _S;
+export const ROOM_HEIGHT = 3.6; // taller ceiling (world Y, not scaled)
 export const WALL_THICKNESS = 0.3 * _S;
 export const ROOMBA_RADIUS = 0.4 * _S;
 
-// Door opening on north wall, scaled
-export const DOOR_X_MIN = 3.2 * _S;
-export const DOOR_X_MAX = 4.8 * _S;
+// Door opening (raw and scaled variants)
+export const RAW_DOOR_X_MIN = 3.2;
+export const RAW_DOOR_X_MAX = 4.8;
+export const DOOR_X_MIN = RAW_DOOR_X_MIN * _S;
+export const DOOR_X_MAX = RAW_DOOR_X_MAX * _S;
 
 // Solid obstacles (Roomba cannot pass) — defined in unscaled units, then scaled
 const RAW_OBSTACLES: AABB[] = [
