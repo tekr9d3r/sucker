@@ -67,15 +67,22 @@ export const DirtField = ({ playerRef, active }: Props) => {
       const mesh = meshRef.current;
       if (mesh) {
         const m = new THREE.Matrix4();
+        const q = new THREE.Quaternion();
+        const eul = new THREE.Euler();
+        const scl = new THREE.Vector3();
+        const pos = new THREE.Vector3();
         cells.forEach((c, i) => {
-          // small random jitter & scale for organic look
           const jx = (Math.sin(i * 12.9898) * 43758.5453) % 1;
           const jz = (Math.cos(i * 78.233) * 12345.6789) % 1;
           const ox = (jx - 0.5) * CELL * 0.4;
           const oz = (jz - 0.5) * CELL * 0.4;
-          const s = 0.6 + Math.abs(jx) * 0.5;
-          m.makeScale(s, s, s);
-          m.setPosition(c.x + ox, 0.005, c.z + oz);
+          const s = 0.7 + Math.abs(jx) * 0.6;
+          // Lay flat on floor (rotate -90° X) + random yaw around Y
+          eul.set(-Math.PI / 2, 0, jx * Math.PI * 2);
+          q.setFromEuler(eul);
+          scl.set(s, s, s);
+          pos.set(c.x + ox, 0.008, c.z + oz);
+          m.compose(pos, q, scl);
           mesh.setMatrixAt(i, m);
         });
         mesh.instanceMatrix.needsUpdate = true;
@@ -161,14 +168,12 @@ export const DirtField = ({ playerRef, active }: Props) => {
       ref={meshRef}
       args={[undefined, undefined, cells.length]}
       frustumCulled={false}
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, 0.008, 0]}
     >
-      <planeGeometry args={[CELL * 1.5, CELL * 1.5]} />
+      <planeGeometry args={[CELL * 1.6, CELL * 1.6]} />
       <meshBasicMaterial
         map={dustTex}
         transparent
-        opacity={0.85}
+        opacity={0.9}
         depthWrite={false}
         alphaTest={0.05}
       />
