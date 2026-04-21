@@ -6,14 +6,19 @@ export interface AABB {
   maxZ: number;
 }
 
-export const ROOM_HALF = 8; // 16x16 room — cozier
-export const ROOM_HEIGHT = 2.7;
-export const WALL_THICKNESS = 0.3;
-export const ROOMBA_RADIUS = 0.4;
+// World scaling: shrink the whole apartment by this factor (visual + collisions)
+// keeps the same furniture layout but makes the room cozier.
+export const WORLD_SCALE = 0.7;
+const _S = WORLD_SCALE;
 
-// Door opening on north wall (z = -ROOM_HALF). Opening centered at x=4, width 1.6
-export const DOOR_X_MIN = 3.2;
-export const DOOR_X_MAX = 4.8;
+export const ROOM_HALF = 8 * _S; // shrunk room
+export const ROOM_HEIGHT = 3.6; // taller ceiling
+export const WALL_THICKNESS = 0.3 * _S;
+export const ROOMBA_RADIUS = 0.4 * _S;
+
+// Door opening on north wall, scaled
+export const DOOR_X_MIN = 3.2 * _S;
+export const DOOR_X_MAX = 4.8 * _S;
 
 // Solid obstacles (Roomba cannot pass)
 export const SOLID_OBSTACLES: AABB[] = [
