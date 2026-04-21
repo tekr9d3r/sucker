@@ -1,8 +1,10 @@
 // Procedural audio via Web Audio API — no asset files needed.
 let ctx: AudioContext | null = null;
-let suctionGain: GainNode | null = null;
-let suctionOsc: OscillatorNode | null = null;
-let suctionNoise: AudioBufferSourceNode | null = null;
+let suctionMaster: GainNode | null = null;
+let motorOscs: OscillatorNode[] = [];   // fundamental + harmonics (need pitch-bend)
+let suctionBuffers: AudioBufferSourceNode[] = [];
+
+const MOTOR_BASE_HZ = 230; // realistic vacuum motor fundamental
 
 const getCtx = (): AudioContext | null => {
   if (typeof window === "undefined") return null;
@@ -14,7 +16,7 @@ const getCtx = (): AudioContext | null => {
   return ctx;
 };
 
-const makeNoiseBuffer = (c: AudioContext, seconds = 1): AudioBuffer => {
+const makeNoiseBuffer = (c: AudioContext, seconds = 2): AudioBuffer => {
   const buf = c.createBuffer(1, c.sampleRate * seconds, c.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
@@ -23,57 +25,95 @@ const makeNoiseBuffer = (c: AudioContext, seconds = 1): AudioBuffer => {
 
 export const startSuction = () => {
   const c = getCtx();
-  if (!c) return;
-  if (suctionGain) return;
-  suctionGain = c.createGain();
-  suctionGain.gain.value = 0.0;
-  suctionGain.connect(c.destination);
+  if (!c || suctionMaster) return;
 
-  // Low rumble oscillator
-  suctionOsc = c.createOscillator();
-  suctionOsc.type = "sawtooth";
-  suctionOsc.frequency.value = 110;
-  const oscGain = c.createGain();
-  oscGain.gain.value = 0.04;
-  suctionOsc.connect(oscGain).connect(suctionGain);
-  suctionOsc.start();
+  suctionMaster = c.createGain();
+  suctionMaster.gain.value = 0;
+  suctionMaster.connect(c.destination);
 
-  // White noise for "suction" hiss
-  const noise = c.createBufferSource();
-  noise.buffer = makeNoiseBuffer(c, 2);
-  noise.loop = true;
-  const filter = c.createBiquadFilter();
-  filter.type = "bandpass";
-  filter.frequency.value = 800;
-  filter.Q.value = 0.8;
-  const noiseGain = c.createGain();
-  noiseGain.gain.value = 0.08;
-  noise.connect(filter).connect(noiseGain).connect(suctionGain);
-  noise.start();
-  suctionNoise = noise;
+  // ── Motor whine: sawtooth fundamental + 3 harmonics ──────────────────────
+  // Sawtooth naturally has all harmonics; we stack them with harmonic rolloff
+  // for a thick electric-motor character.
+  const harmonicGains = [0.28, 0.14, 0.07, 0.04];
+  harmonicGains.forEach((gainVal, i) => {
+    const osc = c.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.value = MOTOR_BASE_HZ * (i + 1);
+    // Slight bandpass per harmonic to tame harshness while keeping presence
+    const bp = c.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = MOTOR_BASE_HZ * (i + 1);
+    bp.Q.value = 2.5;
+    const g = c.createGain();
+    g.gain.value = gainVal;
+    osc.connect(bp).connect(g).connect(suctionMaster!);
+    osc.start();
+    motorOscs.push(osc);
+  });
+
+  // ── High whine: characteristic 2–3 kHz motor screech ─────────────────────
+  const whineOsc = c.createOscillator();
+  whineOsc.type = "sine";
+  whineOsc.frequency.value = 2600;
+  const whineGain = c.createGain();
+  whineGain.gain.value = 0.055;
+  whineOsc.connect(whineGain).connect(suctionMaster);
+  whineOsc.start();
+  motorOscs.push(whineOsc); // also pitch-bent in setSuctionIntensity
+
+  // ── Air rush: highpass-filtered white noise ───────────────────────────────
+  // This gives the "whoooosh" of suction air, dominant above ~1.5 kHz.
+  const rushNoise = c.createBufferSource();
+  rushNoise.buffer = makeNoiseBuffer(c);
+  rushNoise.loop = true;
+  const rushHp = c.createBiquadFilter();
+  rushHp.type = "highpass";
+  rushHp.frequency.value = 1500;
+  rushHp.Q.value = 0.4;
+  const rushGain = c.createGain();
+  rushGain.gain.value = 0.32;
+  rushNoise.connect(rushHp).connect(rushGain).connect(suctionMaster);
+  rushNoise.start();
+  suctionBuffers.push(rushNoise);
+
+  // ── Low rumble: lowpass-filtered noise ───────────────────────────────────
+  // Motor housing vibration felt more than heard.
+  const rumbleNoise = c.createBufferSource();
+  rumbleNoise.buffer = makeNoiseBuffer(c);
+  rumbleNoise.loop = true;
+  const rumbleLp = c.createBiquadFilter();
+  rumbleLp.type = "lowpass";
+  rumbleLp.frequency.value = 190;
+  const rumbleGain = c.createGain();
+  rumbleGain.gain.value = 0.22;
+  rumbleNoise.connect(rumbleLp).connect(rumbleGain).connect(suctionMaster);
+  rumbleNoise.start();
+  suctionBuffers.push(rumbleNoise);
 };
 
 export const setSuctionIntensity = (v: number) => {
-  if (!suctionGain || !ctx) return;
-  const target = Math.max(0, Math.min(1, v)) * 0.5;
-  suctionGain.gain.linearRampToValueAtTime(target, ctx.currentTime + 0.05);
+  if (!suctionMaster || !ctx) return;
+  const clamped = Math.max(0, Math.min(1, v));
+
+  // Volume ramp
+  suctionMaster.gain.linearRampToValueAtTime(clamped * 0.65, ctx.currentTime + 0.08);
+
+  // Pitch rise with speed: up to ~10% higher at max intensity
+  // Simulates motor RPM increasing as the vacuum works harder.
+  const pitchScale = 1 + clamped * 0.1;
+  motorOscs.forEach((osc, i) => {
+    const isWhine = i >= 4;
+    const base = isWhine ? 2600 : MOTOR_BASE_HZ * (i + 1);
+    osc.frequency.linearRampToValueAtTime(base * pitchScale, ctx!.currentTime + 0.12);
+  });
 };
 
 export const stopSuction = () => {
-  if (suctionOsc) {
-    try { suctionOsc.stop(); } catch { /* noop */ }
-    suctionOsc.disconnect();
-    suctionOsc = null;
-  }
-  if (suctionNoise) {
-    try { suctionNoise.stop(); } catch { /* noop */ }
-    suctionNoise.disconnect();
-    suctionNoise = null;
-  }
-  if (suctionGain) {
-    suctionGain.disconnect();
-    suctionGain = null;
-  }
+  motorOscs.forEach((o) => { try { o.stop(); } catch { /* noop */ } o.disconnect(); });
+  motorOscs = [];
+  suctionBuffers.forEach((b) => { try { b.stop(); } catch { /* noop */ } b.disconnect(); });
+  suctionBuffers = [];
+  if (suctionMaster) { suctionMaster.disconnect(); suctionMaster = null; }
 };
 
 export const playThud = () => {
