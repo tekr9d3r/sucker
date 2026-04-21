@@ -18,7 +18,6 @@ export const StartScreen = () => {
   const status = useGameStore((s) => s.status);
   const start = useGameStore((s) => s.start);
   const bestMs = useGameStore((s) => s.bestMs);
-  const playerName = useGameStore((s) => s.playerName);
   const setPlayerName = useGameStore((s) => s.setPlayerName);
 
   const getLeaderboardFn = useServerFn(getLeaderboard);
@@ -61,152 +60,103 @@ export const StartScreen = () => {
 
   if (status !== "idle") return null;
 
-  const trimmed = playerName.trim();
-  const canStart = trimmed.length >= 1 && trimmed.length <= 20;
-
   const handleStart = async () => {
-    if (!canStart) return;
     await resumeAudio();
     startSuction();
     start();
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-gradient-to-br from-slate-950/90 via-slate-900/90 to-amber-950/80 backdrop-blur">
-      <div className="my-8 w-full max-w-md rounded-2xl border border-white/10 bg-black/50 p-8 text-center shadow-2xl">
-        <img
-          src={vacuumLogo}
-          alt="Vacuum Game logo"
-          className="mx-auto mb-3 h-40 w-40 drop-shadow-[0_8px_24px_rgba(56,189,248,0.35)]"
-          width={160}
-          height={160}
-        />
-        <h1 className="sr-only">Vacuum Game</h1>
-        <p className="mb-6 text-sm text-white/70">
-          You ARE the vacuum. Race the clock to leave a shiny clean trail behind you.
-        </p>
+    <div className="fixed inset-0 z-40 overflow-y-auto bg-gradient-to-br from-slate-950/90 via-slate-900/90 to-amber-950/80 backdrop-blur">
+      <div className="flex min-h-full items-center justify-center p-6">
+        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-black/50 p-8 text-center shadow-2xl">
+          <img
+            src={vacuumLogo}
+            alt="Vacuum Game logo"
+            className="mx-auto mb-4 h-40 w-40 drop-shadow-[0_8px_24px_rgba(56,189,248,0.35)]"
+            width={160}
+            height={160}
+          />
+          <h1 className="sr-only">Vacuum Game</h1>
+          <p className="mb-6 text-sm text-white/70">
+            You ARE the vacuum. Race the clock to leave a shiny clean trail behind you.
+          </p>
 
-        {/* Top 10 Leaderboard */}
-        <div className="mb-4 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3">
-          <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-amber-200/80">
-            🏆 Top 10 Leaderboard
-          </div>
-          {topLoading ? (
-            <div className="text-xs text-white/40">Loading…</div>
-          ) : topList.length === 0 ? (
-            <div className="text-xs text-white/60">No scores yet — be the first!</div>
-          ) : (
-            <div className="space-y-1">
-              {topList.map((entry) => (
-                <div key={entry.rank} className="flex items-center gap-2 text-xs">
-                  <span className={`w-5 text-right font-bold tabular-nums ${entry.rank === 1 ? "text-amber-300" : "text-white/40"}`}>
-                    {entry.rank}.
-                  </span>
-                  <span className="font-mono tabular-nums text-white/90">
-                    {formatTime(entry.scoreMs)}
-                  </span>
-                  <span className="truncate text-white/60">{entry.name}</span>
-                </div>
-              ))}
+          {bestMs !== null && (
+            <div className="mb-3 text-sm text-amber-300">
+              Personal best:{" "}
+              <span className="font-mono font-bold">{formatTime(bestMs)}</span>
             </div>
           )}
-        </div>
 
-        <div className="mb-4 text-left">
-          <label
-            htmlFor="player-name"
-            className="mb-1 block text-xs uppercase tracking-widest text-white/60"
+          <button
+            onClick={handleStart}
+            className="mb-6 w-full rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-base font-semibold text-white shadow-lg transition-transform hover:scale-105 active:scale-100"
           >
-            Your name
-          </label>
-          <input
-            id="player-name"
-            type="text"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && canStart) handleStart();
-            }}
-            placeholder="Nickname"
-            maxLength={20}
-            autoComplete="off"
-            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-emerald-400/60 focus:outline-none"
-          />
-        </div>
+            Start Cleaning
+          </button>
 
-        <div className="mb-6 rounded-lg bg-white/5 p-4 text-left text-sm text-white/80">
-          <div className="mb-2 font-semibold text-white">Controls</div>
-          <div className="grid grid-cols-2 gap-y-1 font-mono text-xs">
-            <span className="text-white/60">W / ↑</span>
-            <span>Forward</span>
-            <span className="text-white/60">S / ↓</span>
-            <span>Backward</span>
-            <span className="text-white/60">A · D / ← →</span>
-            <span>Turn</span>
-            <span className="text-white/60">Shift</span>
-            <span>Boost</span>
-            <span className="text-white/60">R</span>
-            <span>Restart</span>
+          {/* Top 10 Leaderboard */}
+          <div className="mb-6 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-left">
+            <div className="mb-2 text-center text-[10px] font-semibold uppercase tracking-widest text-amber-200/80">
+              🏆 Top 10 Leaderboard
+            </div>
+            {topLoading ? (
+              <div className="text-center text-xs text-white/40">Loading…</div>
+            ) : topList.length === 0 ? (
+              <div className="text-center text-xs text-white/60">No scores yet — be the first!</div>
+            ) : (
+              <div className="space-y-1">
+                {topList.map((entry) => (
+                  <div key={entry.rank} className="flex items-center gap-2 text-xs">
+                    <span
+                      className={`w-5 text-right font-bold tabular-nums ${
+                        entry.rank === 1 ? "text-amber-300" : "text-white/40"
+                      }`}
+                    >
+                      {entry.rank}.
+                    </span>
+                    <span className="font-mono tabular-nums text-white/90">
+                      {formatTime(entry.scoreMs)}
+                    </span>
+                    <span className="truncate text-white/60">{entry.name}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="mt-3 space-y-1 border-t border-white/10 pt-3 text-xs text-amber-200/90">
-            <div>⚠️ Hitting walls/furniture damages you (+time penalty)</div>
-            <div>🐈 Don't hit the cat — instant game over!</div>
-          </div>
-        </div>
 
-        {bestMs !== null && (
-          <div className="mb-4 text-sm text-amber-300">
-            Personal best:{" "}
-            <span className="font-mono font-bold">{formatTime(bestMs)}</span>
-          </div>
-        )}
-
-        <button
-          onClick={handleStart}
-          disabled={!canStart}
-          className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-base font-semibold text-white shadow-lg transition-transform hover:scale-105 active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
-        >
-          {canStart ? "Start Cleaning" : "Enter your name"}
-        </button>
-
-        {/* Socials */}
-        <div className="mt-6 border-t border-white/10 pt-4">
-          <div className="mb-2 text-[10px] uppercase tracking-widest text-white/40">
-            Made by tekrox
-          </div>
-          <div className="flex items-center justify-center gap-2">
-            <a
-              href="https://x.com/tekr0x"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="X (Twitter) — @tekr0x"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 transition-colors hover:border-white/30 hover:bg-white/10 hover:text-white"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                className="h-4 w-4 fill-current"
+          {/* Socials */}
+          <div className="border-t border-white/10 pt-4">
+            <div className="mb-2 text-[10px] uppercase tracking-widest text-white/40">
+              Made by tekrox
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <a
+                href="https://x.com/tekr0x"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="X (Twitter) — @tekr0x"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 transition-colors hover:border-white/30 hover:bg-white/10 hover:text-white"
               >
-                <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.79l-5.32-6.96L4.8 22H1.54l8.02-9.16L1 2h6.91l4.81 6.36L18.244 2Zm-2.38 18h1.88L7.27 4H5.27l10.594 16Z" />
-              </svg>
-              <span>@tekr0x</span>
-            </a>
-            <a
-              href="https://github.com/tekr9d3r"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub — tekr9d3r"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 transition-colors hover:border-white/30 hover:bg-white/10 hover:text-white"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                className="h-4 w-4 fill-current"
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current">
+                  <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.79l-5.32-6.96L4.8 22H1.54l8.02-9.16L1 2h6.91l4.81 6.36L18.244 2Zm-2.38 18h1.88L7.27 4H5.27l10.594 16Z" />
+                </svg>
+                <span>@tekr0x</span>
+              </a>
+              <a
+                href="https://github.com/tekr9d3r"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub — tekr9d3r"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 transition-colors hover:border-white/30 hover:bg-white/10 hover:text-white"
               >
-                <path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2.18c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.25 3.34.95.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.21-1.49 3.17-1.18 3.17-1.18.63 1.58.24 2.75.12 3.04.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
-              </svg>
-              <span>tekr9d3r</span>
-            </a>
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current">
+                  <path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2.18c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.25 3.34.95.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.21-1.49 3.17-1.18 3.17-1.18.63 1.58.24 2.75.12 3.04.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
+                </svg>
+                <span>tekr9d3r</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
