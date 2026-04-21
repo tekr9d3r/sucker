@@ -410,15 +410,6 @@ export const Apartment = () => {
         color="#fff0c8"
         target-position={[0, 0, 0]}
       />
-      {/* Sunlight pool on floor near east window — subtle warm patch */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[5, 0.012, 3]}>
-        <planeGeometry args={[3, 4]} />
-        <meshBasicMaterial color="#ffe8b0" transparent opacity={0.18} blending={THREE.AdditiveBlending} />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[5, 0.012, 6.5]}>
-        <planeGeometry args={[2.5, 2.5]} />
-        <meshBasicMaterial color="#ffe8b0" transparent opacity={0.14} blending={THREE.AdditiveBlending} />
-      </mesh>
     </group>
   );
 };
@@ -433,11 +424,36 @@ interface WindowProps {
 const Window = ({ position, rotation, width, height, tex }: WindowProps) => {
   const halfW = width / 2;
   const halfH = height / 2;
+  // Aspect-correct city scene: scale a much LARGER backdrop and push it
+  // far outside the wall so it parallaxes like a real distant view.
+  const sceneScale = 3.0;
+  const sceneW = width * sceneScale;
+  const sceneH = height * sceneScale;
   return (
     <group position={position} rotation={rotation}>
-      <mesh position={[0, 0, -0.18]}>
-        <planeGeometry args={[width, height]} />
+      {/* Distant city backdrop — pushed far behind glass, oversized for parallax */}
+      <mesh position={[0, 0, -6]}>
+        <planeGeometry args={[sceneW, sceneH]} />
         <meshBasicMaterial map={tex} toneMapped={false} />
+      </mesh>
+      {/* Soft sky-blue tint behind everything in case backdrop edges show */}
+      <mesh position={[0, 0, -6.2]}>
+        <planeGeometry args={[sceneW * 1.5, sceneH * 1.5]} />
+        <meshBasicMaterial color="#b8d8ee" toneMapped={false} />
+      </mesh>
+      {/* Glass pane — slight blue tint, transparent, subtle reflection feel */}
+      <mesh position={[0, 0, 0]}>
+        <planeGeometry args={[width, height]} />
+        <meshPhysicalMaterial
+          color="#dbeefb"
+          transparent
+          opacity={0.18}
+          roughness={0.05}
+          metalness={0}
+          transmission={0.9}
+          thickness={0.05}
+          ior={1.45}
+        />
       </mesh>
       {/* Frame */}
       <mesh position={[0, halfH + 0.07, 0]}>
@@ -456,24 +472,19 @@ const Window = ({ position, rotation, width, height, tex }: WindowProps) => {
         <boxGeometry args={[0.14, height + 0.3, 0.1]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
-      {/* Mullions */}
-      <mesh position={[0, 0, 0.01]}>
-        <boxGeometry args={[0.05, height, 0.05]} />
+      {/* Mullions — slim cross dividing the glass */}
+      <mesh position={[0, 0, 0.02]}>
+        <boxGeometry args={[0.04, height, 0.04]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
-      <mesh position={[0, 0, 0.01]}>
-        <boxGeometry args={[width, 0.05, 0.05]} />
+      <mesh position={[0, 0, 0.02]}>
+        <boxGeometry args={[width, 0.04, 0.04]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
       {/* Sill */}
       <mesh position={[0, -halfH - 0.13, 0.18]}>
         <boxGeometry args={[width + 0.4, 0.07, 0.3]} />
         <meshStandardMaterial color="#f5f5f5" />
-      </mesh>
-      {/* Sun glow */}
-      <mesh position={[0, 0, 0.04]}>
-        <planeGeometry args={[width, height]} />
-        <meshBasicMaterial color="#fff4d0" transparent opacity={0.08} />
       </mesh>
     </group>
   );
