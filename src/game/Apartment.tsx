@@ -504,117 +504,158 @@ export const Apartment = () => {
         </group>
       ))}
 
-      {/* TV stand & TV with AV gear */}
-      <group position={[0, 0, 7.15]}>
-        {/* Cabinet body */}
-        <mesh position={[0, 0.4, 0]} castShadow>
-          <boxGeometry args={[6, 0.8, 0.7]} />
-          <meshStandardMaterial color={tvColor} roughness={0.5} />
+      {/* TV stand & TV with AV gear — redesigned, pulled into room, screen faces -Z */}
+      <group position={[0, 0, 6.2]}>
+        {/* === Cabinet === */}
+        {/* Top surface */}
+        <mesh position={[0, 0.82, 0]} castShadow receiveShadow>
+          <boxGeometry args={[3.6, 0.06, 0.9]} />
+          <meshStandardMaterial color="#3a2515" roughness={0.5} />
         </mesh>
-        {/* Cabinet doors (left + right compartments) */}
-        {[-2, 2].map((dx, i) => (
-          <mesh key={`door-${i}`} position={[dx, 0.4, 0.36]}>
-            <boxGeometry args={[1.5, 0.6, 0.02]} />
-            <meshStandardMaterial color="#2a2a2a" />
+        {/* Bottom shelf */}
+        <mesh position={[0, 0.42, 0]} castShadow receiveShadow>
+          <boxGeometry args={[3.6, 0.04, 0.9]} />
+          <meshStandardMaterial color="#3a2515" roughness={0.5} />
+        </mesh>
+        {/* Back panel */}
+        <mesh position={[0, 0.6, -0.42]} castShadow>
+          <boxGeometry args={[3.6, 0.5, 0.05]} />
+          <meshStandardMaterial color="#2a1a0c" roughness={0.7} />
+        </mesh>
+        {/* Side panels */}
+        {[-1.78, 1.78].map((sx, i) => (
+          <mesh key={`tvside-${i}`} position={[sx, 0.6, 0]} castShadow>
+            <boxGeometry args={[0.04, 0.5, 0.9]} />
+            <meshStandardMaterial color="#3a2515" />
           </mesh>
         ))}
-        {/* Door handles */}
-        {[-2, 2].map((dx, i) => (
-          <mesh key={`hndl-${i}`} position={[dx + 0.55, 0.4, 0.38]}>
-            <boxGeometry args={[0.12, 0.04, 0.03]} />
-            <meshStandardMaterial color="#c9a040" metalness={0.7} roughness={0.3} />
+        {/* Vertical divider creating left cabinet + open right shelf */}
+        <mesh position={[-0.5, 0.6, 0]}>
+          <boxGeometry args={[0.04, 0.5, 0.9]} />
+          <meshStandardMaterial color="#3a2515" />
+        </mesh>
+        {/* Closed cabinet door (left) */}
+        <mesh position={[-1.15, 0.6, 0.46]}>
+          <boxGeometry args={[1.2, 0.48, 0.025]} />
+          <meshStandardMaterial color="#4a3020" roughness={0.6} />
+        </mesh>
+        <mesh position={[-0.65, 0.6, 0.48]}>
+          <sphereGeometry args={[0.025, 12, 12]} />
+          <meshStandardMaterial color="#c9a040" metalness={0.8} roughness={0.3} />
+        </mesh>
+        {/* Cabinet legs */}
+        {[
+          [-1.7, -0.4],
+          [1.7, -0.4],
+          [-1.7, 0.4],
+          [1.7, 0.4],
+        ].map(([lx, lz], i) => (
+          <mesh key={`tvleg-${i}`} position={[lx, 0.2, lz]} castShadow>
+            <boxGeometry args={[0.08, 0.4, 0.08]} />
+            <meshStandardMaterial color="#2a1a0c" />
           </mesh>
         ))}
-        {/* Open center shelf with AV gear */}
-        {/* VCR */}
-        <group position={[-0.8, 0.32, 0.05]}>
+
+        {/* === VCR (on right side of bottom shelf) === */}
+        <group position={[0.7, 0.5, 0.05]}>
           <mesh castShadow>
-            <boxGeometry args={[1.3, 0.18, 0.55]} />
-            <meshStandardMaterial color="#1f1f1f" roughness={0.5} />
+            <boxGeometry args={[1.0, 0.16, 0.55]} />
+            <meshStandardMaterial color="#1a1a1a" roughness={0.5} />
           </mesh>
           {/* Cassette slot */}
-          <mesh position={[0, 0.02, 0.28]}>
-            <boxGeometry args={[0.6, 0.04, 0.01]} />
-            <meshStandardMaterial color="#000" />
+          <mesh position={[-0.05, 0.02, 0.276]}>
+            <boxGeometry args={[0.5, 0.035, 0.005]} />
+            <meshBasicMaterial color="#000" />
           </mesh>
-          {/* Green digital clock display */}
-          <mesh position={[-0.45, 0, 0.28]}>
-            <boxGeometry args={[0.25, 0.07, 0.01]} />
-            <meshStandardMaterial color="#0a0a0a" emissive="#22cc44" emissiveIntensity={0.8} />
+          {/* Green digital clock */}
+          <mesh position={[-0.38, -0.01, 0.276]}>
+            <boxGeometry args={[0.18, 0.05, 0.005]} />
+            <meshBasicMaterial color="#22ff44" toneMapped={false} />
           </mesh>
-          {/* Buttons row */}
-          {[0.15, 0.27, 0.39, 0.51].map((bx, i) => (
-            <mesh key={`vcrbtn-${i}`} position={[bx - 0.15, -0.02, 0.28]}>
-              <boxGeometry args={[0.05, 0.04, 0.015]} />
-              <meshStandardMaterial color="#333" />
+          {/* Buttons */}
+          {[0.1, 0.2, 0.3, 0.4].map((bx, i) => (
+            <mesh key={`vcrbtn-${i}`} position={[bx, -0.02, 0.276]}>
+              <boxGeometry args={[0.05, 0.035, 0.012]} />
+              <meshStandardMaterial color="#444" />
             </mesh>
           ))}
           {/* Red power LED */}
-          <mesh position={[0.6, 0, 0.28]}>
+          <mesh position={[0.46, 0, 0.276]}>
             <sphereGeometry args={[0.012, 8, 8]} />
-            <meshStandardMaterial color="#ff2020" emissive="#ff2020" emissiveIntensity={1} />
+            <meshBasicMaterial color="#ff2020" toneMapped={false} />
           </mesh>
         </group>
-        {/* Vinyl turntable */}
-        <group position={[0.85, 0.55, 0.05]}>
+
+        {/* === Vinyl turntable (on top of cabinet, left side) === */}
+        <group position={[-1.0, 0.86, 0]}>
           {/* Plinth */}
           <mesh castShadow>
-            <boxGeometry args={[1.2, 0.1, 0.85]} />
-            <meshStandardMaterial color="#3a2515" roughness={0.6} />
+            <boxGeometry args={[1.1, 0.08, 0.75]} />
+            <meshStandardMaterial color="#1a1a1a" roughness={0.6} />
           </mesh>
           {/* Platter */}
-          <mesh position={[-0.05, 0.06, 0]} castShadow>
-            <cylinderGeometry args={[0.36, 0.36, 0.03, 32]} />
-            <meshStandardMaterial color="#1a1a1a" metalness={0.4} roughness={0.5} />
+          <mesh position={[0, 0.05, 0]} castShadow>
+            <cylinderGeometry args={[0.32, 0.32, 0.025, 32]} />
+            <meshStandardMaterial color="#0a0a0a" metalness={0.4} roughness={0.5} />
           </mesh>
           {/* Vinyl record */}
-          <mesh position={[-0.05, 0.08, 0]}>
-            <cylinderGeometry args={[0.34, 0.34, 0.005, 32]} />
-            <meshStandardMaterial color="#0a0a0a" roughness={0.3} />
+          <mesh position={[0, 0.065, 0]}>
+            <cylinderGeometry args={[0.3, 0.3, 0.004, 32]} />
+            <meshStandardMaterial color="#0a0a0a" roughness={0.25} />
           </mesh>
           {/* Record label */}
-          <mesh position={[-0.05, 0.083, 0]}>
-            <cylinderGeometry args={[0.1, 0.1, 0.002, 24]} />
+          <mesh position={[0, 0.068, 0]}>
+            <cylinderGeometry args={[0.09, 0.09, 0.002, 24]} />
             <meshStandardMaterial color="#c93030" />
           </mesh>
-          {/* Center spindle */}
-          <mesh position={[-0.05, 0.095, 0]}>
-            <cylinderGeometry args={[0.008, 0.008, 0.025, 8]} />
-            <meshStandardMaterial color="#888" metalness={0.9} />
+          {/* Spindle */}
+          <mesh position={[0, 0.08, 0]}>
+            <cylinderGeometry args={[0.007, 0.007, 0.025, 8]} />
+            <meshStandardMaterial color="#999" metalness={0.9} />
           </mesh>
           {/* Tonearm pivot */}
-          <mesh position={[0.4, 0.07, 0.3]} castShadow>
-            <cylinderGeometry args={[0.04, 0.04, 0.06, 12]} />
+          <mesh position={[0.36, 0.06, 0.28]} castShadow>
+            <cylinderGeometry args={[0.035, 0.035, 0.05, 12]} />
             <meshStandardMaterial color="#aaa" metalness={0.8} />
           </mesh>
           {/* Tonearm */}
-          <mesh position={[0.18, 0.09, 0.15]} rotation={[0, -0.7, 0]} castShadow>
-            <boxGeometry args={[0.5, 0.02, 0.025]} />
+          <mesh position={[0.15, 0.075, 0.13]} rotation={[0, -0.7, 0]} castShadow>
+            <boxGeometry args={[0.45, 0.018, 0.022]} />
             <meshStandardMaterial color="#cccccc" metalness={0.7} roughness={0.3} />
           </mesh>
-          {/* Cartridge head */}
-          <mesh position={[-0.05, 0.085, 0.02]} castShadow>
-            <boxGeometry args={[0.05, 0.025, 0.04]} />
+        </group>
+
+        {/* === TV — sits ON TOP of cabinet, screen faces -Z (toward player) === */}
+        <group position={[0.5, 1.55, 0]}>
+          {/* Bezel: outer frame, thin */}
+          <mesh castShadow>
+            <boxGeometry args={[2.6, 1.55, 0.1]} />
+            <meshStandardMaterial color="#0a0a0a" roughness={0.4} metalness={0.2} />
+          </mesh>
+          {/* Screen — recessed slightly, BIG and clearly in front, faces -Z */}
+          <mesh position={[0, 0, -0.052]}>
+            <planeGeometry args={[2.4, 1.35]} />
+            <meshBasicMaterial map={tvNewsTex} toneMapped={false} side={THREE.DoubleSide} />
+          </mesh>
+          {/* Brand label below screen */}
+          <mesh position={[0, -0.7, -0.052]}>
+            <planeGeometry args={[0.3, 0.05]} />
+            <meshBasicMaterial color="#444" toneMapped={false} />
+          </mesh>
+          {/* TV stand neck */}
+          <mesh position={[0, -0.85, 0]} castShadow>
+            <boxGeometry args={[0.25, 0.15, 0.15]} />
             <meshStandardMaterial color="#1a1a1a" />
           </mesh>
+          {/* TV stand foot */}
+          <mesh position={[0, -0.92, 0]} castShadow>
+            <boxGeometry args={[0.6, 0.02, 0.3]} />
+            <meshStandardMaterial color="#1a1a1a" metalness={0.5} />
+          </mesh>
         </group>
-        {/* TV bezel */}
-        <mesh position={[0, 1.7, 0.2]} castShadow>
-          <boxGeometry args={[3.6, 2, 0.1]} />
-          <meshStandardMaterial color="#0a0a0a" />
-        </mesh>
-        {/* Static news image as TV screen */}
-        <mesh position={[0, 1.7, 0.26]} renderOrder={2}>
-          <planeGeometry args={[3.4, 1.85]} />
-          <meshBasicMaterial map={tvNewsTex} toneMapped={false} />
-        </mesh>
-        {/* Subtle screen glow light */}
-        <pointLight position={[0, 1.7, 1]} intensity={0.25} color="#a8c8ff" distance={3} />
-        {/* Decorative vase on top corner of cabinet */}
-        <mesh position={[2.4, 0.95, 0]} castShadow>
-          <cylinderGeometry args={[0.13, 0.18, 0.35, 16]} />
-          <meshStandardMaterial color="#d4a574" />
-        </mesh>
+
+        {/* Screen glow */}
+        <pointLight position={[0.5, 1.55, -0.6]} intensity={0.45} color="#9ec5ff" distance={4} />
       </group>
 
       {/* Bookshelf on left wall — richly detailed */}
