@@ -48,7 +48,7 @@ export const Game = () => {
         gl={{ antialias: true }}
       >
         <color attach="background" args={["#1a1410"]} />
-        <fog attach="fog" args={["#2a1f15", 8, 25]} />
+        <fog attach="fog" args={["#2a201a", 14, 38]} />
         <ambientLight intensity={0.55} color="#fff1d6" />
         <directionalLight
           position={[5, 8, -3]}
