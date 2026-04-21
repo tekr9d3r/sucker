@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import { Apartment } from "./Apartment";
-import { Roomba } from "./Roomba";
+import { Vacuum } from "./Vacuum";
 import { DirtField } from "./DirtField";
 import { Cat } from "./Cat";
 import { HUD } from "./HUD";
@@ -55,7 +55,7 @@ export const Game = () => {
         <Apartment />
         <DirtField playerRef={playerRef} active={status === "playing"} />
         <Cat playerRef={playerRef} />
-        <Roomba playerRef={playerRef} onShake={handleShake} />
+        <Vacuum playerRef={playerRef} onShake={handleShake} />
       </Canvas>
 
       <div

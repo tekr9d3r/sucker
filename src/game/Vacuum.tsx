@@ -15,7 +15,7 @@ const BOOST_SPEED = 6.0;
 const ROT_SPEED = 2.4;
 const CAM_HEIGHT = 0.2;
 
-export const Roomba = ({ playerRef, onShake }: Props) => {
+export const Vacuum = ({ playerRef, onShake }: Props) => {
   const { camera } = useThree();
   const reset = useGameStore((s) => s.reset);
   const status = useGameStore((s) => s.status);

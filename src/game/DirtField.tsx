@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { ROOM_HALF, SOLID_OBSTACLES, ROOMBA_RADIUS } from "./obstacles";
+import { ROOM_HALF, SOLID_OBSTACLES, VACUUM_RADIUS } from "./obstacles";
 import { useGameStore } from "./useGameStore";
 
 const GRID = 70;
@@ -113,10 +113,10 @@ export const DirtField = ({ playerRef, active }: Props) => {
     const px = playerRef.current.x;
     const pz = playerRef.current.z;
     const yaw = playerRef.current.yaw ?? 0;
-    // Forward direction (matches Roomba.tsx: dx = -sin(yaw), dz = -cos(yaw))
+    // Forward direction (matches Vacuum.tsx: dx = -sin(yaw), dz = -cos(yaw))
     const fx = -Math.sin(yaw);
     const fz = -Math.cos(yaw);
-    const r = ROOMBA_RADIUS;
+    const r = VACUUM_RADIUS;
     const r2 = r * r;
 
     const minIx = Math.max(0, Math.floor((px - r + ROOM_HALF) / CELL));

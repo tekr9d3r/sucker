@@ -37,7 +37,7 @@ export const GameOverScreen = () => {
         </p>
 
         <div className="mb-6 rounded-lg bg-red-500/10 p-4 text-sm text-red-200">
-          A good Roomba never harms its furry overlords. Try again, but watch the mini-map.
+          A good Vacuum never harms its furry overlords. Try again, but watch the mini-map.
         </div>
 
         <button

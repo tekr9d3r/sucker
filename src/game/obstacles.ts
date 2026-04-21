@@ -1,4 +1,4 @@
-// AABB obstacles for collision. y is ignored — Roomba is on the floor.
+// AABB obstacles for collision. y is ignored — Vacuum is on the floor.
 export interface AABB {
   minX: number;
   maxX: number;
@@ -20,7 +20,7 @@ export const ROOM_HALF = RAW_ROOM_HALF * _S;
 export const ROOM_HEIGHT = 3.6; // taller ceiling (world Y, not scaled)
 export const RAW_WALL_THICKNESS = 0.3;
 export const WALL_THICKNESS = RAW_WALL_THICKNESS * _S;
-export const ROOMBA_RADIUS = 0.4 * _S;
+export const VACUUM_RADIUS = 0.4 * _S;
 
 // Door opening (raw and scaled variants)
 export const RAW_DOOR_X_MIN = 3.2;
@@ -28,13 +28,13 @@ export const RAW_DOOR_X_MAX = 4.8;
 export const DOOR_X_MIN = RAW_DOOR_X_MIN * _S;
 export const DOOR_X_MAX = RAW_DOOR_X_MAX * _S;
 
-// Solid obstacles (Roomba cannot pass) — defined in unscaled units, then scaled
+// Solid obstacles (Vacuum cannot pass) — defined in unscaled units, then scaled
 const RAW_OBSTACLES: AABB[] = [
   // Sofa
   { minX: -7, maxX: -2, minZ: -7.5, maxZ: -6.2 },
   { minX: -7.4, maxX: -7, minZ: -7.5, maxZ: -6 },
   { minX: -2, maxX: -1.6, minZ: -7.5, maxZ: -6 },
-  // TV stand — only the 4 legs are solid, Roomba can vacuum underneath
+  // TV stand — only the 4 legs are solid, Vacuum can vacuum underneath
   // Cabinet group is at z=6.55, legs offset ±1.7 x, ±0.4 z, ~0.08 wide
   { minX: -1.74, maxX: -1.66, minZ: 6.11, maxZ: 6.19 },
   { minX: 1.66, maxX: 1.74, minZ: 6.11, maxZ: 6.19 },
@@ -107,7 +107,7 @@ export const resolveCollision = (
   let x = newX;
   let z = newZ;
   let hit = false;
-  const r = ROOMBA_RADIUS;
+  const r = VACUUM_RADIUS;
 
   for (const b of ALL) {
     if (x + r > b.minX && x - r < b.maxX && oldZ + r > b.minZ && oldZ - r < b.maxZ) {
