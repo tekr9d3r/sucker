@@ -115,7 +115,7 @@ export const Roomba = ({ playerRef, onShake }: Props) => {
     }
 
     const progress = useGameStore.getState().progress;
-    if (playing && progress >= 0.999) {
+    if (playing && progress >= 0.8) {
       finish();
     }
   });

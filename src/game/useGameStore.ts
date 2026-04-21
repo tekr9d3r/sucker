@@ -84,8 +84,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       damageMs: 0,
     }),
   tickTime: (ms) => set({ elapsedMs: ms }),
+  // Game ends at 80% real coverage; UI shows scaled 0..1 so 80% reads as 100%.
   setProgress: (cleaned, total) =>
-    set({ cleanedCells: cleaned, totalCells: total, progress: total > 0 ? cleaned / total : 0 }),
+    set({
+      cleanedCells: cleaned,
+      totalCells: total,
+      progress: total > 0 ? Math.min(1, cleaned / total / 0.8) : 0,
+    }),
   setPlayer: (x, z, angle) => set({ playerX: x, playerZ: z, playerAngle: angle }),
   setCat: (x, z) => set({ catX: x, catZ: z }),
   bumpCells: () => set((s) => ({ cellsVersion: s.cellsVersion + 1 })),
