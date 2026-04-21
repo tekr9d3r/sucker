@@ -7,13 +7,13 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Roomba Speed Clean — 1st-Person Vacuum Sim" },
+      { title: "Vacuum Game — 1st-Person Speed Cleaning" },
       {
         name: "description",
         content:
-          "You are the vacuum. Race the clock in this 1st-person Roomba simulator and clean every speck of dust in the apartment.",
+          "You are the vacuum. Race the clock in this 1st-person speed-cleaning game and sweep every speck of dust in the apartment.",
       },
-      { property: "og:title", content: "Roomba Speed Clean — 1st-Person Vacuum Sim" },
+      { property: "og:title", content: "Vacuum Game — 1st-Person Speed Cleaning" },
       {
         property: "og:description",
         content:
