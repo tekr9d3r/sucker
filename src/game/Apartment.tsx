@@ -232,37 +232,79 @@ export const Apartment = () => {
         </mesh>
       </group>
 
-      {/* Sofa */}
+      {/* Sofa — richly detailed with tufting, piping and seat cushions */}
       <group position={[-4.5, 0, -6.85]}>
+        {/* Base frame */}
         <mesh position={[0, 0.35, 0]} castShadow>
           <boxGeometry args={[5, 0.7, 1.3]} />
-          <meshStandardMaterial color={sofaColor} roughness={0.9} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
         </mesh>
+        {/* Front piping along base */}
+        <mesh position={[0, 0.7, 0.66]}>
+          <cylinderGeometry args={[0.025, 0.025, 4.6, 8]} rotation={[0, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#4d5867" roughness={0.8} />
+        </mesh>
+        {/* Backrest */}
         <mesh position={[0, 1.0, -0.5]} castShadow>
           <boxGeometry args={[5, 1.3, 0.3]} />
-          <meshStandardMaterial color={sofaColor} roughness={0.9} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
         </mesh>
+        {/* Tufting buttons on backrest (3x4 grid) */}
+        {[-2, -0.65, 0.65, 2].map((bx) =>
+          [0.7, 1.25].map((by) => (
+            <mesh key={`tuft-${bx}-${by}`} position={[bx, by, -0.36]} castShadow>
+              <sphereGeometry args={[0.04, 8, 8]} />
+              <meshStandardMaterial color="#4d5867" roughness={0.6} />
+            </mesh>
+          )),
+        )}
+        {/* Armrests with rolled top */}
         <mesh position={[-2.5, 0.6, 0]} castShadow>
           <boxGeometry args={[0.4, 1.2, 1.3]} />
-          <meshStandardMaterial color={sofaColor} roughness={0.9} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
+        </mesh>
+        <mesh position={[-2.5, 1.22, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.18, 0.18, 1.3, 16]} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
         </mesh>
         <mesh position={[2.5, 0.6, 0]} castShadow>
           <boxGeometry args={[0.4, 1.2, 1.3]} />
-          <meshStandardMaterial color={sofaColor} roughness={0.9} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
         </mesh>
+        <mesh position={[2.5, 1.22, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.18, 0.18, 1.3, 16]} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
+        </mesh>
+        {/* Seat cushions — slightly varied tones for fabric realism */}
         {[-1.5, 0, 1.5].map((cx, i) => (
-          <mesh key={i} position={[cx, 0.85, 0.05]} castShadow>
-            <boxGeometry args={[1.4, 0.3, 1]} />
-            <meshStandardMaterial color={sofaCushionColor} roughness={0.95} />
-          </mesh>
+          <group key={`seat-${i}`} position={[cx, 0.85, 0.05]}>
+            <mesh castShadow>
+              <boxGeometry args={[1.4, 0.32, 1]} />
+              <meshStandardMaterial
+                color={i === 1 ? "#7d8ba0" : sofaCushionColor}
+                roughness={0.98}
+              />
+            </mesh>
+            {/* Seam piping around top edge */}
+            <mesh position={[0, 0.16, 0.5]}>
+              <cylinderGeometry args={[0.018, 0.018, 1.4, 8]} rotation={[0, 0, Math.PI / 2]} />
+              <meshStandardMaterial color="#4d5867" />
+            </mesh>
+          </group>
         ))}
+        {/* Throw pillows */}
         <mesh position={[-1.7, 1.0, 0.15]} rotation={[0, 0, 0.2]} castShadow>
           <boxGeometry args={[0.55, 0.4, 0.25]} />
-          <meshStandardMaterial color="#c9794a" />
+          <meshStandardMaterial color="#c9794a" roughness={1} />
         </mesh>
         <mesh position={[1.8, 1.0, 0.15]} rotation={[0, 0, -0.15]} castShadow>
           <boxGeometry args={[0.55, 0.4, 0.25]} />
-          <meshStandardMaterial color="#3e6b3e" />
+          <meshStandardMaterial color="#3e6b3e" roughness={1} />
+        </mesh>
+        {/* A small striped patterned pillow in middle */}
+        <mesh position={[0.1, 1.05, 0.18]} rotation={[0, 0, 0.05]} castShadow>
+          <boxGeometry args={[0.5, 0.35, 0.22]} />
+          <meshStandardMaterial color="#e8d8b8" roughness={1} />
         </mesh>
         {/* Knitted throw blanket draped over right armrest */}
         <mesh position={[2.1, 0.78, 0.3]} rotation={[0.2, 0.1, 0]} castShadow>
@@ -272,6 +314,11 @@ export const Apartment = () => {
         <mesh position={[2.45, 0.55, 0.55]} rotation={[0, 0, 0.3]} castShadow>
           <boxGeometry args={[0.5, 0.5, 0.05]} />
           <meshStandardMaterial color="#b85c4a" roughness={1} />
+        </mesh>
+        {/* Folded second blanket on left armrest */}
+        <mesh position={[-2.5, 1.45, 0]} castShadow>
+          <boxGeometry args={[0.55, 0.12, 0.85]} />
+          <meshStandardMaterial color="#5a6e7d" roughness={1} />
         </mesh>
         {/* Wooden sofa legs */}
         {[-2.4, -0.8, 0.8, 2.4].map((lx, i) => (
