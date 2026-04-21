@@ -1,10 +1,46 @@
 // Procedural audio via Web Audio API — no asset files needed.
 let ctx: AudioContext | null = null;
 let suctionMaster: GainNode | null = null;
-let motorOscs: OscillatorNode[] = [];   // fundamental + harmonics (need pitch-bend)
+let motorOscs: OscillatorNode[] = [];
 let suctionBuffers: AudioBufferSourceNode[] = [];
 
-const MOTOR_BASE_HZ = 230; // realistic vacuum motor fundamental
+// ── Melody state ──────────────────────────────────────────────────────────────
+let melodyGain: GainNode | null = null;
+let melodyActive = false;
+let melodyLoopTimer: ReturnType<typeof setTimeout> | null = null;
+
+const MOTOR_BASE_HZ = 230;
+
+const BPM = 118;
+const SPB = 60 / BPM; // seconds per beat
+
+// Upbeat 16-beat loop in C major. [freq_hz, beats] — 0 = rest.
+const MELODY: [number, number][] = [
+  [659.25, 0.5],  // E5
+  [587.33, 0.5],  // D5
+  [523.25, 1.0],  // C5
+  [392.00, 0.5],  // G4
+  [440.00, 0.5],  // A4
+  [523.25, 1.0],  // C5
+  [659.25, 0.5],  // E5
+  [783.99, 0.5],  // G5
+  [659.25, 0.5],  // E5
+  [587.33, 0.5],  // D5
+  [523.25, 2.0],  // C5 (held)
+  [0,      0.5],  // rest
+  [440.00, 0.5],  // A4
+  [523.25, 0.5],  // C5
+  [587.33, 0.5],  // D5
+  [659.25, 1.0],  // E5
+  [587.33, 0.5],  // D5
+  [523.25, 0.5],  // C5
+  [493.88, 0.5],  // B4
+  [440.00, 0.5],  // A4
+  [523.25, 2.0],  // C5 (held)
+  [0,      1.0],  // rest
+];
+
+const MELODY_DUR_S = MELODY.reduce((s, [, b]) => s + b * SPB, 0);
 
 const getCtx = (): AudioContext | null => {
   if (typeof window === "undefined") return null;
@@ -23,6 +59,56 @@ const makeNoiseBuffer = (c: AudioContext, seconds = 2): AudioBuffer => {
   return buf;
 };
 
+function scheduleMelodyLoop(c: AudioContext, startAt: number): void {
+  if (!melodyActive || !melodyGain) return;
+  let t = startAt;
+  for (const [freq, beats] of MELODY) {
+    if (freq > 0) {
+      const dur = beats * SPB;
+      const osc = c.createOscillator();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.2, t + 0.018);
+      g.gain.setValueAtTime(0.17, t + dur * 0.72);
+      g.gain.linearRampToValueAtTime(0, t + dur * 0.9);
+      osc.connect(g).connect(melodyGain!);
+      osc.start(t);
+      osc.stop(t + dur);
+    }
+    t += beats * SPB;
+  }
+  // Re-schedule 150 ms before loop ends to avoid gaps
+  const msUntilReschedule = Math.max(0, (startAt + MELODY_DUR_S - c.currentTime - 0.15) * 1000);
+  melodyLoopTimer = setTimeout(() => {
+    const c2 = getCtx();
+    if (c2 && melodyActive) scheduleMelodyLoop(c2, startAt + MELODY_DUR_S);
+  }, msUntilReschedule);
+}
+
+function startMelody(): void {
+  const c = getCtx();
+  if (!c || melodyActive) return;
+  melodyActive = true;
+  melodyGain = c.createGain();
+  melodyGain.gain.value = 0.38;
+  melodyGain.connect(c.destination);
+  scheduleMelodyLoop(c, c.currentTime + 0.05);
+}
+
+function stopMelody(): void {
+  melodyActive = false;
+  if (melodyLoopTimer !== null) { clearTimeout(melodyLoopTimer); melodyLoopTimer = null; }
+  if (melodyGain) {
+    const c = getCtx();
+    if (c) melodyGain.gain.linearRampToValueAtTime(0, c.currentTime + 0.4);
+    setTimeout(() => { melodyGain?.disconnect(); melodyGain = null; }, 500);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const startSuction = () => {
   const c = getCtx();
   if (!c || suctionMaster) return;
@@ -31,15 +117,12 @@ export const startSuction = () => {
   suctionMaster.gain.value = 0;
   suctionMaster.connect(c.destination);
 
-  // ── Motor whine: sawtooth fundamental + 3 harmonics ──────────────────────
-  // Sawtooth naturally has all harmonics; we stack them with harmonic rolloff
-  // for a thick electric-motor character.
+  // Motor whine: sawtooth fundamental + 3 harmonics with bandpass shaping
   const harmonicGains = [0.28, 0.14, 0.07, 0.04];
   harmonicGains.forEach((gainVal, i) => {
     const osc = c.createOscillator();
     osc.type = "sawtooth";
     osc.frequency.value = MOTOR_BASE_HZ * (i + 1);
-    // Slight bandpass per harmonic to tame harshness while keeping presence
     const bp = c.createBiquadFilter();
     bp.type = "bandpass";
     bp.frequency.value = MOTOR_BASE_HZ * (i + 1);
@@ -51,7 +134,7 @@ export const startSuction = () => {
     motorOscs.push(osc);
   });
 
-  // ── High whine: characteristic 2–3 kHz motor screech ─────────────────────
+  // High whine: characteristic 2–3 kHz motor screech
   const whineOsc = c.createOscillator();
   whineOsc.type = "sine";
   whineOsc.frequency.value = 2600;
@@ -59,10 +142,9 @@ export const startSuction = () => {
   whineGain.gain.value = 0.055;
   whineOsc.connect(whineGain).connect(suctionMaster);
   whineOsc.start();
-  motorOscs.push(whineOsc); // also pitch-bent in setSuctionIntensity
+  motorOscs.push(whineOsc);
 
-  // ── Air rush: highpass-filtered white noise ───────────────────────────────
-  // This gives the "whoooosh" of suction air, dominant above ~1.5 kHz.
+  // Air rush: highpass-filtered white noise
   const rushNoise = c.createBufferSource();
   rushNoise.buffer = makeNoiseBuffer(c);
   rushNoise.loop = true;
@@ -76,8 +158,7 @@ export const startSuction = () => {
   rushNoise.start();
   suctionBuffers.push(rushNoise);
 
-  // ── Low rumble: lowpass-filtered noise ───────────────────────────────────
-  // Motor housing vibration felt more than heard.
+  // Low rumble: lowpass-filtered noise
   const rumbleNoise = c.createBufferSource();
   rumbleNoise.buffer = makeNoiseBuffer(c);
   rumbleNoise.loop = true;
@@ -89,6 +170,8 @@ export const startSuction = () => {
   rumbleNoise.connect(rumbleLp).connect(rumbleGain).connect(suctionMaster);
   rumbleNoise.start();
   suctionBuffers.push(rumbleNoise);
+
+  startMelody();
 };
 
 export const setSuctionIntensity = (v: number) => {
@@ -97,7 +180,7 @@ export const setSuctionIntensity = (v: number) => {
 
   suctionMaster.gain.linearRampToValueAtTime(clamped * 0.65, ctx.currentTime + 0.08);
 
-  // Subtle pitch rise: only 2% at max intensity (was 10% — too noticeable)
+  // Subtle pitch rise: only 2% at max intensity
   const pitchScale = 1 + clamped * 0.02;
   motorOscs.forEach((osc, i) => {
     const isWhine = i >= 4;
@@ -107,6 +190,7 @@ export const setSuctionIntensity = (v: number) => {
 };
 
 export const stopSuction = () => {
+  stopMelody();
   motorOscs.forEach((o) => { try { o.stop(); } catch { /* noop */ } o.disconnect(); });
   motorOscs = [];
   suctionBuffers.forEach((b) => { try { b.stop(); } catch { /* noop */ } b.disconnect(); });
