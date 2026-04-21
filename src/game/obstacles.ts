@@ -18,7 +18,8 @@ export const RAW_ROOM_HALF = 8;
 // Scaled (world) room footprint used by physics, AI, dirt grid
 export const ROOM_HALF = RAW_ROOM_HALF * _S;
 export const ROOM_HEIGHT = 3.6; // taller ceiling (world Y, not scaled)
-export const WALL_THICKNESS = 0.3 * _S;
+export const RAW_WALL_THICKNESS = 0.3;
+export const WALL_THICKNESS = RAW_WALL_THICKNESS * _S;
 export const ROOMBA_RADIUS = 0.4 * _S;
 
 // Door opening (raw and scaled variants)
