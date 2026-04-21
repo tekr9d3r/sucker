@@ -30,6 +30,9 @@ export const Route = createFileRoute("/")({
           "You are the vacuum. Race the clock and sweep every speck of dust in the apartment.",
       },
     ],
+    scripts: [
+      { src: "https://vibejam.cc/2026/widget.js", async: true },
+    ],
   }),
 });
 
