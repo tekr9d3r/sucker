@@ -28,13 +28,31 @@ export type LeaderboardResult = {
 
 const TOP_N = 10;
 
+export type TopScore = { name: string; scoreMs: number } | null;
+
+export const getTopScore = createServerFn({ method: "GET" }).handler(
+  async (): Promise<TopScore> => {
+    await ensureSchemaOnce();
+    const sql = getSql();
+    const rows = (await sql`
+      SELECT name, score_ms
+      FROM vacuum_scores
+      ORDER BY score_ms ASC, created_at ASC
+      LIMIT 1
+    `) as Array<{ name: string; score_ms: number }>;
+    if (rows.length === 0) return null;
+    return { name: rows[0].name, scoreMs: Number(rows[0].score_ms) };
+  },
+);
+
+
 export const submitScore = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => submitSchema.parse(input))
   .handler(async ({ data }) => {
     await ensureSchemaOnce();
     const sql = getSql();
     const rows = (await sql`
-      INSERT INTO roomba_scores (name, score_ms)
+      INSERT INTO vacuum_scores (name, score_ms)
       VALUES (${data.name}, ${data.scoreMs})
       RETURNING id
     `) as Array<{ id: number | string }>;
@@ -53,7 +71,7 @@ export const getLeaderboard = createServerFn({ method: "POST" })
 
     const topRows = (await sql`
       SELECT id, name, score_ms, created_at
-      FROM roomba_scores
+      FROM vacuum_scores
       ORDER BY score_ms ASC, created_at ASC
       LIMIT ${TOP_N}
     `) as Array<{ id: number | string; name: string; score_ms: number; created_at: string }>;
@@ -71,7 +89,7 @@ export const getLeaderboard = createServerFn({ method: "POST" })
       if (!inTop) {
         const meRows = (await sql`
           SELECT id, name, score_ms, created_at
-          FROM roomba_scores
+          FROM vacuum_scores
           WHERE id = ${data.aroundId}
           LIMIT 1
         `) as Array<{ id: number | string; name: string; score_ms: number; created_at: string }>;
@@ -79,7 +97,7 @@ export const getLeaderboard = createServerFn({ method: "POST" })
         if (me) {
           const rankRows = (await sql`
             SELECT COUNT(*)::int AS better
-            FROM roomba_scores
+            FROM vacuum_scores
             WHERE score_ms < ${me.score_ms}
                OR (score_ms = ${me.score_ms} AND created_at < ${me.created_at})
           `) as Array<{ better: number }>;

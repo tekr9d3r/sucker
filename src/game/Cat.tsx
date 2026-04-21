@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
-import { isPointBlocked, ROOMBA_RADIUS } from "./obstacles";
+import { isPointBlocked, VACUUM_RADIUS } from "./obstacles";
 import { useGameStore } from "./useGameStore";
 import catFurUrl from "@/assets/cat-fur.jpg";
 
@@ -11,10 +11,10 @@ interface Props {
 
 const CAT_RADIUS = 0.35;
 const CAT_SPEED = 1.4;
-const CAT_HIT_DIST = ROOMBA_RADIUS + CAT_RADIUS;
+const CAT_HIT_DIST = VACUUM_RADIUS + CAT_RADIUS;
 
 /**
- * Wandering cat: picks random destination, walks toward it. If the Roomba gets
+ * Wandering cat: picks random destination, walks toward it. If the Vacuum gets
  * close, the cat gets startled and may dart away. Touching it = game over.
  */
 export const Cat = ({ playerRef }: Props) => {
@@ -81,7 +81,7 @@ export const Cat = ({ playerRef }: Props) => {
         s.pauseUntil = now + 600 + Math.random() * 1800;
         if (Math.random() < 0.5) pickTarget();
       } else {
-        // Roomba proximity: spook the cat
+        // Vacuum proximity: spook the cat
         const pdx = playerRef.current.x - s.x;
         const pdz = playerRef.current.z - s.z;
         const pdist = Math.sqrt(pdx * pdx + pdz * pdz);
@@ -143,7 +143,7 @@ export const Cat = ({ playerRef }: Props) => {
 
     setCat(s.x, s.z);
 
-    // Collision with Roomba = game over
+    // Collision with Vacuum = game over
     const dx = playerRef.current.x - s.x;
     const dz = playerRef.current.z - s.z;
     if (dx * dx + dz * dz < CAT_HIT_DIST * CAT_HIT_DIST) {

@@ -37,8 +37,8 @@ interface GameState {
   takeDamage: (amount: number) => void;
 }
 
-const BEST_KEY = "roomba.bestMs";
-const NAME_KEY = "roomba.playerName";
+const BEST_KEY = "vacuum.bestMs";
+const NAME_KEY = "vacuum.playerName";
 
 const loadBest = (): number | null => {
   if (typeof window === "undefined") return null;

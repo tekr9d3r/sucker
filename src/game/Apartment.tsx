@@ -504,7 +504,7 @@ export const Apartment = () => {
         </group>
       ))}
 
-      {/* TV stand & TV with AV gear — cabinet flipped so doors face player; pushed to wall; tall legs for Roomba clearance */}
+      {/* TV stand & TV with AV gear — cabinet flipped so doors face player; pushed to wall; tall legs for Vacuum clearance */}
       <group position={[0, 0, 6.55]}>
         {/* Cabinet sub-group, rotated 180° so the door/front face -Z (toward player) */}
         <group rotation={[0, Math.PI, 0]}>
