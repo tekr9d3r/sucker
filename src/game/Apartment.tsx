@@ -13,7 +13,7 @@ import floorUrl from "@/assets/floor-wood.jpg";
 import wallUrl from "@/assets/wall-plaster.jpg";
 import windowViewUrl from "@/assets/window-view.jpg";
 import rugUrl from "@/assets/rug.jpg";
-import { TVScreen } from "./TVScreen";
+import tvNewsUrl from "@/assets/tv-news.jpg";
 
 const sofaColor = "#6b7a8f";
 const sofaCushionColor = "#8694a8";
@@ -41,6 +41,7 @@ export const Apartment = () => {
   const wallTex = useTiledTexture(wallUrl, 2, 1);
   const rugTex = useLoader(THREE.TextureLoader, rugUrl);
   const windowTex = useLoader(THREE.TextureLoader, windowViewUrl);
+  const tvNewsTex = useLoader(THREE.TextureLoader, tvNewsUrl);
 
   const doorWidth = DOOR_X_MAX - DOOR_X_MIN;
   const doorCenterX = (DOOR_X_MAX + DOOR_X_MIN) / 2;
@@ -122,9 +123,9 @@ export const Apartment = () => {
         <meshStandardMaterial map={wallTex} />
       </mesh>
 
-      {/* South wall — split into 4 segments around window at x=5, width 2.5, y 0.65–2.25 */}
+      {/* South wall — split into 4 segments around a much wider window */}
       {(() => {
-        const W = 2.5, H = 1.6, cx = 5, cy = 1.45;
+        const W = 4.5, H = 2.0, cx = 4.5, cy = 1.5;
         const xL = cx - W / 2, xR = cx + W / 2;
         const yB = cy - H / 2, yT = cy + H / 2;
         const z = ROOM_HALF + WALL_THICKNESS / 2;
@@ -156,9 +157,9 @@ export const Apartment = () => {
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_HALF * 2]} />
         <meshStandardMaterial map={wallTex} />
       </mesh>
-      {/* East wall — split into 4 segments around window at z=3, width 3.5, y 0.55–2.35 */}
+      {/* East wall — split into 4 segments around a much wider window */}
       {(() => {
-        const W = 3.5, H = 1.8, cz = 3, cy = 1.45;
+        const W = 5.5, H = 2.1, cz = 2, cy = 1.55;
         const zN = cz - W / 2, zS = cz + W / 2;
         const yB = cy - H / 2, yT = cy + H / 2;
         const x = ROOM_HALF + WALL_THICKNESS / 2;
@@ -215,10 +216,10 @@ export const Apartment = () => {
         <pointLight position={[-0.2, 1.5, -0.6]} intensity={0.3} color="#fff5d6" distance={4} />
       </group>
 
-      {/* WINDOW 1 — east wall (large) */}
-      <Window position={[ROOM_HALF - 0.02, 1.45, 3]} rotation={[0, -Math.PI / 2, 0]} width={3.5} height={1.8} tex={windowTex} />
-      {/* WINDOW 2 — south wall (smaller) */}
-      <Window position={[5, 1.45, ROOM_HALF + 0.02]} rotation={[0, Math.PI, 0]} width={2.5} height={1.6} tex={windowTex} />
+      {/* WINDOW 1 — east wall (extra wide) */}
+      <Window position={[ROOM_HALF - 0.02, 1.55, 2]} rotation={[0, -Math.PI / 2, 0]} width={5.5} height={2.1} tex={windowTex} />
+      {/* WINDOW 2 — south wall (wide) */}
+      <Window position={[4.5, 1.5, ROOM_HALF + 0.02]} rotation={[0, Math.PI, 0]} width={4.5} height={2.0} tex={windowTex} />
 
       {/* Wall art — picture above sofa */}
       <group position={[-4, 1.6, -ROOM_HALF + 0.05]}>
@@ -503,23 +504,113 @@ export const Apartment = () => {
         </group>
       ))}
 
-      {/* TV stand & TV */}
+      {/* TV stand & TV with AV gear */}
       <group position={[0, 0, 7.15]}>
+        {/* Cabinet body */}
         <mesh position={[0, 0.4, 0]} castShadow>
           <boxGeometry args={[6, 0.8, 0.7]} />
           <meshStandardMaterial color={tvColor} roughness={0.5} />
         </mesh>
-        {[-2, 0, 2].map((dx, i) => (
-          <mesh key={i} position={[dx, 0.4, 0.36]}>
+        {/* Cabinet doors (left + right compartments) */}
+        {[-2, 2].map((dx, i) => (
+          <mesh key={`door-${i}`} position={[dx, 0.4, 0.36]}>
             <boxGeometry args={[1.5, 0.6, 0.02]} />
             <meshStandardMaterial color="#2a2a2a" />
           </mesh>
         ))}
+        {/* Door handles */}
+        {[-2, 2].map((dx, i) => (
+          <mesh key={`hndl-${i}`} position={[dx + 0.55, 0.4, 0.38]}>
+            <boxGeometry args={[0.12, 0.04, 0.03]} />
+            <meshStandardMaterial color="#c9a040" metalness={0.7} roughness={0.3} />
+          </mesh>
+        ))}
+        {/* Open center shelf with AV gear */}
+        {/* VCR */}
+        <group position={[-0.8, 0.32, 0.05]}>
+          <mesh castShadow>
+            <boxGeometry args={[1.3, 0.18, 0.55]} />
+            <meshStandardMaterial color="#1f1f1f" roughness={0.5} />
+          </mesh>
+          {/* Cassette slot */}
+          <mesh position={[0, 0.02, 0.28]}>
+            <boxGeometry args={[0.6, 0.04, 0.01]} />
+            <meshStandardMaterial color="#000" />
+          </mesh>
+          {/* Green digital clock display */}
+          <mesh position={[-0.45, 0, 0.28]}>
+            <boxGeometry args={[0.25, 0.07, 0.01]} />
+            <meshStandardMaterial color="#0a0a0a" emissive="#22cc44" emissiveIntensity={0.8} />
+          </mesh>
+          {/* Buttons row */}
+          {[0.15, 0.27, 0.39, 0.51].map((bx, i) => (
+            <mesh key={`vcrbtn-${i}`} position={[bx - 0.15, -0.02, 0.28]}>
+              <boxGeometry args={[0.05, 0.04, 0.015]} />
+              <meshStandardMaterial color="#333" />
+            </mesh>
+          ))}
+          {/* Red power LED */}
+          <mesh position={[0.6, 0, 0.28]}>
+            <sphereGeometry args={[0.012, 8, 8]} />
+            <meshStandardMaterial color="#ff2020" emissive="#ff2020" emissiveIntensity={1} />
+          </mesh>
+        </group>
+        {/* Vinyl turntable */}
+        <group position={[0.85, 0.55, 0.05]}>
+          {/* Plinth */}
+          <mesh castShadow>
+            <boxGeometry args={[1.2, 0.1, 0.85]} />
+            <meshStandardMaterial color="#3a2515" roughness={0.6} />
+          </mesh>
+          {/* Platter */}
+          <mesh position={[-0.05, 0.06, 0]} castShadow>
+            <cylinderGeometry args={[0.36, 0.36, 0.03, 32]} />
+            <meshStandardMaterial color="#1a1a1a" metalness={0.4} roughness={0.5} />
+          </mesh>
+          {/* Vinyl record */}
+          <mesh position={[-0.05, 0.08, 0]}>
+            <cylinderGeometry args={[0.34, 0.34, 0.005, 32]} />
+            <meshStandardMaterial color="#0a0a0a" roughness={0.3} />
+          </mesh>
+          {/* Record label */}
+          <mesh position={[-0.05, 0.083, 0]}>
+            <cylinderGeometry args={[0.1, 0.1, 0.002, 24]} />
+            <meshStandardMaterial color="#c93030" />
+          </mesh>
+          {/* Center spindle */}
+          <mesh position={[-0.05, 0.095, 0]}>
+            <cylinderGeometry args={[0.008, 0.008, 0.025, 8]} />
+            <meshStandardMaterial color="#888" metalness={0.9} />
+          </mesh>
+          {/* Tonearm pivot */}
+          <mesh position={[0.4, 0.07, 0.3]} castShadow>
+            <cylinderGeometry args={[0.04, 0.04, 0.06, 12]} />
+            <meshStandardMaterial color="#aaa" metalness={0.8} />
+          </mesh>
+          {/* Tonearm */}
+          <mesh position={[0.18, 0.09, 0.15]} rotation={[0, -0.7, 0]} castShadow>
+            <boxGeometry args={[0.5, 0.02, 0.025]} />
+            <meshStandardMaterial color="#cccccc" metalness={0.7} roughness={0.3} />
+          </mesh>
+          {/* Cartridge head */}
+          <mesh position={[-0.05, 0.085, 0.02]} castShadow>
+            <boxGeometry args={[0.05, 0.025, 0.04]} />
+            <meshStandardMaterial color="#1a1a1a" />
+          </mesh>
+        </group>
+        {/* TV bezel */}
         <mesh position={[0, 1.7, 0.2]} castShadow>
           <boxGeometry args={[3.6, 2, 0.1]} />
           <meshStandardMaterial color="#0a0a0a" />
         </mesh>
-        <TVScreen position={[0, 1.7, 0.26]} width={3.4} height={1.85} />
+        {/* Static news image as TV screen */}
+        <mesh position={[0, 1.7, 0.26]} renderOrder={2}>
+          <planeGeometry args={[3.4, 1.85]} />
+          <meshBasicMaterial map={tvNewsTex} toneMapped={false} />
+        </mesh>
+        {/* Subtle screen glow light */}
+        <pointLight position={[0, 1.7, 1]} intensity={0.25} color="#a8c8ff" distance={3} />
+        {/* Decorative vase on top corner of cabinet */}
         <mesh position={[2.4, 0.95, 0]} castShadow>
           <cylinderGeometry args={[0.13, 0.18, 0.35, 16]} />
           <meshStandardMaterial color="#d4a574" />
