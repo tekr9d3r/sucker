@@ -34,8 +34,12 @@ const RAW_OBSTACLES: AABB[] = [
   { minX: -7, maxX: -2, minZ: -7.5, maxZ: -6.2 },
   { minX: -7.4, maxX: -7, minZ: -7.5, maxZ: -6 },
   { minX: -2, maxX: -1.6, minZ: -7.5, maxZ: -6 },
-  // TV stand
-  { minX: -3, maxX: 3, minZ: 6.8, maxZ: 7.5 },
+  // TV stand — only the 4 legs are solid, Roomba can vacuum underneath
+  // Cabinet group is at z=6.55, legs offset ±1.7 x, ±0.4 z, ~0.08 wide
+  { minX: -1.74, maxX: -1.66, minZ: 6.11, maxZ: 6.19 },
+  { minX: 1.66, maxX: 1.74, minZ: 6.11, maxZ: 6.19 },
+  { minX: -1.74, maxX: -1.66, minZ: 6.91, maxZ: 6.99 },
+  { minX: 1.66, maxX: 1.74, minZ: 6.91, maxZ: 6.99 },
   // Bookshelf (left wall)
   { minX: -7.5, maxX: -6.9, minZ: 0, maxZ: 4 },
   // Side table next to sofa

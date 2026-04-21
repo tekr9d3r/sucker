@@ -558,31 +558,31 @@ export const Apartment = () => {
           ))}
         </group>
 
-        {/* === VCR (on right side of bottom shelf) === */}
+        {/* === VCR — buttons/clock/LED face -Z (toward player) === */}
         <group position={[0.7, 0.75, 0.05]}>
           <mesh castShadow>
             <boxGeometry args={[1.0, 0.16, 0.55]} />
             <meshStandardMaterial color="#1a1a1a" roughness={0.5} />
           </mesh>
           {/* Cassette slot */}
-          <mesh position={[-0.05, 0.02, 0.276]}>
+          <mesh position={[-0.05, 0.02, -0.276]}>
             <boxGeometry args={[0.5, 0.035, 0.005]} />
             <meshBasicMaterial color="#000" />
           </mesh>
           {/* Green digital clock */}
-          <mesh position={[-0.38, -0.01, 0.276]}>
+          <mesh position={[-0.38, -0.01, -0.276]}>
             <boxGeometry args={[0.18, 0.05, 0.005]} />
             <meshBasicMaterial color="#22ff44" toneMapped={false} />
           </mesh>
           {/* Buttons */}
           {[0.1, 0.2, 0.3, 0.4].map((bx, i) => (
-            <mesh key={`vcrbtn-${i}`} position={[bx, -0.02, 0.276]}>
+            <mesh key={`vcrbtn-${i}`} position={[bx, -0.02, -0.276]}>
               <boxGeometry args={[0.05, 0.035, 0.012]} />
               <meshStandardMaterial color="#444" />
             </mesh>
           ))}
           {/* Red power LED */}
-          <mesh position={[0.46, 0, 0.276]}>
+          <mesh position={[0.46, 0, -0.276]}>
             <sphereGeometry args={[0.012, 8, 8]} />
             <meshBasicMaterial color="#ff2020" toneMapped={false} />
           </mesh>
@@ -634,8 +634,8 @@ export const Apartment = () => {
             <boxGeometry args={[2.6, 1.55, 0.1]} />
             <meshStandardMaterial color="#0a0a0a" roughness={0.4} metalness={0.2} />
           </mesh>
-          {/* Screen — recessed slightly, BIG and clearly in front, faces -Z */}
-          <mesh position={[0, 0, -0.052]}>
+          {/* Screen — recessed slightly, faces -Z (toward player). Rotate plane 180° so it isn't mirrored */}
+          <mesh position={[0, 0, -0.052]} rotation={[0, Math.PI, 0]}>
             <planeGeometry args={[2.4, 1.35]} />
             <meshBasicMaterial map={tvNewsTex} toneMapped={false} side={THREE.DoubleSide} />
           </mesh>
