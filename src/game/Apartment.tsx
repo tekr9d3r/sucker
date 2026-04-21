@@ -1,7 +1,13 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 import { useLoader } from "@react-three/fiber";
-import { ROOM_HALF, ROOM_HEIGHT, WALL_THICKNESS } from "./obstacles";
+import {
+  ROOM_HALF,
+  ROOM_HEIGHT,
+  WALL_THICKNESS,
+  DOOR_X_MIN,
+  DOOR_X_MAX,
+} from "./obstacles";
 import floorUrl from "@/assets/floor-wood.jpg";
 import wallUrl from "@/assets/wall-plaster.jpg";
 import windowViewUrl from "@/assets/window-view.jpg";
@@ -29,22 +35,26 @@ const useTiledTexture = (url: string, repeatX: number, repeatY: number) => {
 };
 
 export const Apartment = () => {
-  const floorTex = useTiledTexture(floorUrl, 6, 6);
-  const wallTex = useTiledTexture(wallUrl, 3, 1);
+  const floorTex = useTiledTexture(floorUrl, 4, 4);
+  const wallTex = useTiledTexture(wallUrl, 2, 1);
   const rugTex = useLoader(THREE.TextureLoader, rugUrl);
   const windowTex = useLoader(THREE.TextureLoader, windowViewUrl);
 
+  const doorWidth = DOOR_X_MAX - DOOR_X_MIN;
+  const doorCenterX = (DOOR_X_MAX + DOOR_X_MIN) / 2;
+  const doorHeight = 2.1;
+
   return (
     <group>
-      {/* Floor with wood texture */}
+      {/* Floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[ROOM_HALF * 2, ROOM_HALF * 2]} />
         <meshStandardMaterial map={floorTex} roughness={0.55} metalness={0.05} />
       </mesh>
 
-      {/* Persian rug under coffee table area */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.005, -6.6]}>
-        <planeGeometry args={[7, 5]} />
+      {/* Persian rug */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-4, 0.005, -3.7]}>
+        <planeGeometry args={[5.2, 4]} />
         <meshStandardMaterial map={rugTex} roughness={0.9} />
       </mesh>
 
@@ -54,7 +64,7 @@ export const Apartment = () => {
         <meshStandardMaterial color="#fff8ec" roughness={0.95} />
       </mesh>
 
-      {/* Crown molding (top trim) */}
+      {/* Crown molding */}
       {[
         { pos: [0, ROOM_HEIGHT - 0.05, -ROOM_HALF + 0.05] as [number, number, number], size: [ROOM_HALF * 2, 0.1, 0.05] as [number, number, number] },
         { pos: [0, ROOM_HEIGHT - 0.05, ROOM_HALF - 0.05] as [number, number, number], size: [ROOM_HALF * 2, 0.1, 0.05] as [number, number, number] },
@@ -69,7 +79,8 @@ export const Apartment = () => {
 
       {/* Baseboards */}
       {[
-        { pos: [0, 0.075, -ROOM_HALF + 0.04] as [number, number, number], size: [ROOM_HALF * 2, 0.15, 0.04] as [number, number, number] },
+        { pos: [-(ROOM_HALF + DOOR_X_MIN) / 2 - 0.1, 0.075, -ROOM_HALF + 0.04] as [number, number, number], size: [ROOM_HALF + DOOR_X_MIN, 0.15, 0.04] as [number, number, number] },
+        { pos: [(ROOM_HALF + DOOR_X_MAX) / 2, 0.075, -ROOM_HALF + 0.04] as [number, number, number], size: [ROOM_HALF - DOOR_X_MAX, 0.15, 0.04] as [number, number, number] },
         { pos: [0, 0.075, ROOM_HALF - 0.04] as [number, number, number], size: [ROOM_HALF * 2, 0.15, 0.04] as [number, number, number] },
         { pos: [-ROOM_HALF + 0.04, 0.075, 0] as [number, number, number], size: [0.04, 0.15, ROOM_HALF * 2] as [number, number, number] },
         { pos: [ROOM_HALF - 0.04, 0.075, 0] as [number, number, number], size: [0.04, 0.15, ROOM_HALF * 2] as [number, number, number] },
@@ -80,319 +91,277 @@ export const Apartment = () => {
         </mesh>
       ))}
 
-      {/* Walls with plaster texture */}
-      <mesh position={[0, ROOM_HEIGHT / 2, -ROOM_HALF - WALL_THICKNESS / 2]}>
-        <boxGeometry args={[ROOM_HALF * 2 + WALL_THICKNESS * 2, ROOM_HEIGHT, WALL_THICKNESS]} />
+      {/* North wall — left and right segments around the door opening */}
+      <mesh
+        position={[
+          (-ROOM_HALF - WALL_THICKNESS + DOOR_X_MIN) / 2,
+          ROOM_HEIGHT / 2,
+          -ROOM_HALF - WALL_THICKNESS / 2,
+        ]}
+      >
+        <boxGeometry args={[ROOM_HALF + WALL_THICKNESS + DOOR_X_MIN, ROOM_HEIGHT, WALL_THICKNESS]} />
         <meshStandardMaterial map={wallTex} />
       </mesh>
+      <mesh
+        position={[
+          (DOOR_X_MAX + ROOM_HALF + WALL_THICKNESS) / 2,
+          ROOM_HEIGHT / 2,
+          -ROOM_HALF - WALL_THICKNESS / 2,
+        ]}
+      >
+        <boxGeometry args={[ROOM_HALF + WALL_THICKNESS - DOOR_X_MAX, ROOM_HEIGHT, WALL_THICKNESS]} />
+        <meshStandardMaterial map={wallTex} />
+      </mesh>
+      {/* Wall segment ABOVE the door */}
+      <mesh
+        position={[doorCenterX, doorHeight + (ROOM_HEIGHT - doorHeight) / 2, -ROOM_HALF - WALL_THICKNESS / 2]}
+      >
+        <boxGeometry args={[doorWidth, ROOM_HEIGHT - doorHeight, WALL_THICKNESS]} />
+        <meshStandardMaterial map={wallTex} />
+      </mesh>
+
+      {/* South wall */}
       <mesh position={[0, ROOM_HEIGHT / 2, ROOM_HALF + WALL_THICKNESS / 2]}>
         <boxGeometry args={[ROOM_HALF * 2 + WALL_THICKNESS * 2, ROOM_HEIGHT, WALL_THICKNESS]} />
         <meshStandardMaterial map={wallTex} />
       </mesh>
+      {/* West wall */}
       <mesh position={[-ROOM_HALF - WALL_THICKNESS / 2, ROOM_HEIGHT / 2, 0]}>
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_HALF * 2]} />
         <meshStandardMaterial map={wallTex} />
       </mesh>
+      {/* East wall */}
       <mesh position={[ROOM_HALF + WALL_THICKNESS / 2, ROOM_HEIGHT / 2, 0]}>
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_HALF * 2]} />
         <meshStandardMaterial map={wallTex} />
       </mesh>
 
-      {/* WINDOW on right wall — view of sunny day */}
-      <group position={[ROOM_HALF - 0.02, 1.55, 4]} rotation={[0, -Math.PI / 2, 0]}>
-        {/* The view (slightly behind window plane to feel deep) */}
-        <mesh position={[0, 0, -0.2]}>
-          <planeGeometry args={[5, 2.4]} />
-          <meshBasicMaterial map={windowTex} toneMapped={false} />
+      {/* DOOR — wooden, in the opening */}
+      <group position={[doorCenterX, 0, -ROOM_HALF + 0.05]}>
+        {/* Door slab — slightly ajar */}
+        <mesh position={[-doorWidth / 2 + 0.05, doorHeight / 2, -0.05]} rotation={[0, -0.25, 0]} castShadow>
+          <boxGeometry args={[doorWidth - 0.05, doorHeight, 0.05]} />
+          <meshStandardMaterial color="#5a3a22" roughness={0.7} />
         </mesh>
-        {/* Frame */}
-        <mesh position={[0, 1.25, 0]}>
-          <boxGeometry args={[5.4, 0.15, 0.1]} />
+        {/* Door frame trim */}
+        <mesh position={[-doorWidth / 2, doorHeight / 2, 0]}>
+          <boxGeometry args={[0.08, doorHeight, 0.15]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
-        <mesh position={[0, -1.25, 0]}>
-          <boxGeometry args={[5.4, 0.15, 0.15]} />
+        <mesh position={[doorWidth / 2, doorHeight / 2, 0]}>
+          <boxGeometry args={[0.08, doorHeight, 0.15]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
-        <mesh position={[-2.55, 0, 0]}>
-          <boxGeometry args={[0.15, 2.6, 0.1]} />
+        <mesh position={[0, doorHeight, 0]}>
+          <boxGeometry args={[doorWidth + 0.16, 0.08, 0.15]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
-        <mesh position={[2.55, 0, 0]}>
-          <boxGeometry args={[0.15, 2.6, 0.1]} />
-          <meshStandardMaterial color="#ffffff" />
+        {/* Door handle */}
+        <mesh position={[doorWidth / 2 - 0.25, 1.05, -0.1]} castShadow>
+          <sphereGeometry args={[0.04, 12, 12]} />
+          <meshStandardMaterial color="#d4a640" metalness={0.8} roughness={0.3} />
         </mesh>
-        {/* Vertical mullion */}
-        <mesh position={[0, 0, 0.01]}>
-          <boxGeometry args={[0.06, 2.4, 0.05]} />
-          <meshStandardMaterial color="#ffffff" />
-        </mesh>
-        {/* Horizontal mullion */}
-        <mesh position={[0, 0, 0.01]}>
-          <boxGeometry args={[5, 0.06, 0.05]} />
-          <meshStandardMaterial color="#ffffff" />
-        </mesh>
-        {/* Window sill */}
-        <mesh position={[0, -1.32, 0.18]}>
-          <boxGeometry args={[5.6, 0.08, 0.3]} />
-          <meshStandardMaterial color="#f5f5f5" />
-        </mesh>
-        {/* Glow plane in front to fake sunshine spilling in */}
-        <mesh position={[0, 0, 0.05]}>
-          <planeGeometry args={[5, 2.4]} />
-          <meshBasicMaterial color="#fff4d0" transparent opacity={0.06} />
-        </mesh>
+        {/* Hallway light spilling in */}
+        <pointLight position={[-0.2, 1.5, -0.6]} intensity={0.3} color="#fff5d6" distance={4} />
       </group>
 
+      {/* WINDOW 1 — east wall (large) */}
+      <Window position={[ROOM_HALF - 0.02, 1.45, 3]} rotation={[0, -Math.PI / 2, 0]} width={3.5} height={1.8} tex={windowTex} />
+      {/* WINDOW 2 — south wall (smaller) */}
+      <Window position={[5, 1.45, ROOM_HALF + 0.02]} rotation={[0, Math.PI, 0]} width={2.5} height={1.6} tex={windowTex} />
+
       {/* Wall art — picture above sofa */}
-      <group position={[-6.5, 1.7, -ROOM_HALF + 0.05]}>
+      <group position={[-4, 1.6, -ROOM_HALF + 0.05]}>
         <mesh>
-          <boxGeometry args={[1.6, 1.1, 0.05]} />
+          <boxGeometry args={[1.4, 1.0, 0.05]} />
           <meshStandardMaterial color="#3a2a18" />
         </mesh>
         <mesh position={[0, 0, 0.03]}>
-          <planeGeometry args={[1.4, 0.9]} />
+          <planeGeometry args={[1.2, 0.85]} />
           <meshStandardMaterial color="#c9a26a" />
         </mesh>
       </group>
-      <group position={[-4.5, 1.7, -ROOM_HALF + 0.05]}>
-        <mesh>
-          <boxGeometry args={[1, 1.4, 0.05]} />
-          <meshStandardMaterial color="#3a2a18" />
-        </mesh>
-        <mesh position={[0, 0, 0.03]}>
-          <planeGeometry args={[0.85, 1.2]} />
-          <meshStandardMaterial color="#3e6b8b" />
-        </mesh>
-      </group>
 
-      {/* Sofa — bigger, more detailed */}
-      <group position={[-6.5, 0, -11.6]}>
-        {/* Base cushion */}
+      {/* Sofa */}
+      <group position={[-4.5, 0, -6.85]}>
         <mesh position={[0, 0.35, 0]} castShadow>
-          <boxGeometry args={[7, 0.7, 1.8]} />
+          <boxGeometry args={[5, 0.7, 1.3]} />
           <meshStandardMaterial color={sofaColor} roughness={0.9} />
         </mesh>
-        {/* Back */}
-        <mesh position={[0, 1.0, -0.7]} castShadow>
-          <boxGeometry args={[7, 1.3, 0.4]} />
+        <mesh position={[0, 1.0, -0.5]} castShadow>
+          <boxGeometry args={[5, 1.3, 0.3]} />
           <meshStandardMaterial color={sofaColor} roughness={0.9} />
         </mesh>
-        {/* Armrests */}
-        <mesh position={[-3.5, 0.6, 0]} castShadow>
-          <boxGeometry args={[0.4, 1.2, 1.8]} />
+        <mesh position={[-2.5, 0.6, 0]} castShadow>
+          <boxGeometry args={[0.4, 1.2, 1.3]} />
           <meshStandardMaterial color={sofaColor} roughness={0.9} />
         </mesh>
-        <mesh position={[3.5, 0.6, 0]} castShadow>
-          <boxGeometry args={[0.4, 1.2, 1.8]} />
+        <mesh position={[2.5, 0.6, 0]} castShadow>
+          <boxGeometry args={[0.4, 1.2, 1.3]} />
           <meshStandardMaterial color={sofaColor} roughness={0.9} />
         </mesh>
-        {/* Seat cushions */}
-        {[-2.2, 0, 2.2].map((cx, i) => (
-          <mesh key={i} position={[cx, 0.85, 0.1]} castShadow>
-            <boxGeometry args={[2, 0.3, 1.4]} />
+        {[-1.5, 0, 1.5].map((cx, i) => (
+          <mesh key={i} position={[cx, 0.85, 0.05]} castShadow>
+            <boxGeometry args={[1.4, 0.3, 1]} />
             <meshStandardMaterial color={sofaCushionColor} roughness={0.95} />
           </mesh>
         ))}
-        {/* Throw pillows */}
-        <mesh position={[-2.5, 1.0, 0.2]} rotation={[0, 0, 0.2]} castShadow>
-          <boxGeometry args={[0.7, 0.5, 0.3]} />
-          <meshStandardMaterial color="#c9794a" roughness={0.95} />
+        <mesh position={[-1.7, 1.0, 0.15]} rotation={[0, 0, 0.2]} castShadow>
+          <boxGeometry args={[0.55, 0.4, 0.25]} />
+          <meshStandardMaterial color="#c9794a" />
         </mesh>
-        <mesh position={[2.6, 1.0, 0.2]} rotation={[0, 0, -0.15]} castShadow>
-          <boxGeometry args={[0.7, 0.5, 0.3]} />
-          <meshStandardMaterial color="#3e6b3e" roughness={0.95} />
+        <mesh position={[1.8, 1.0, 0.15]} rotation={[0, 0, -0.15]} castShadow>
+          <boxGeometry args={[0.55, 0.4, 0.25]} />
+          <meshStandardMaterial color="#3e6b3e" />
         </mesh>
-        {/* Sofa feet */}
-        {[
-          [-3.3, -0.85],
-          [3.3, -0.85],
-          [-3.3, 0.85],
-          [3.3, 0.85],
-        ].map(([fx, fz], i) => (
-          <mesh key={`foot-${i}`} position={[fx, 0.05, fz]} castShadow>
-            <boxGeometry args={[0.15, 0.1, 0.15]} />
-            <meshStandardMaterial color="#2a1f15" />
-          </mesh>
-        ))}
       </group>
 
       {/* Side table next to sofa with lamp */}
-      <group position={[-1.6, 0, -11.8]}>
-        <mesh position={[0, 0.4, 0]} castShadow>
-          <boxGeometry args={[0.8, 0.8, 0.8]} />
+      <group position={[-0.85, 0, -6.95]}>
+        <mesh position={[0, 0.35, 0]} castShadow>
+          <boxGeometry args={[0.7, 0.7, 0.7]} />
           <meshStandardMaterial color={tableColor} />
         </mesh>
-        {/* Table lamp */}
-        <mesh position={[0, 0.95, 0]} castShadow>
-          <cylinderGeometry args={[0.1, 0.15, 0.3, 12]} />
+        <mesh position={[0, 0.85, 0]} castShadow>
+          <cylinderGeometry args={[0.08, 0.13, 0.25, 12]} />
           <meshStandardMaterial color="#1a1a1a" />
         </mesh>
-        <mesh position={[0, 1.3, 0]} castShadow>
-          <cylinderGeometry args={[0.18, 0.28, 0.4, 16]} />
-          <meshStandardMaterial color="#fff5d6" emissive="#ffd88a" emissiveIntensity={0.4} />
+        <mesh position={[0, 1.15, 0]} castShadow>
+          <cylinderGeometry args={[0.16, 0.24, 0.35, 16]} />
+          <meshStandardMaterial color="#fff5d6" emissive="#ffd88a" emissiveIntensity={0.5} />
         </mesh>
-        <pointLight position={[0, 1.3, 0]} intensity={0.3} color="#ffd88a" distance={4} />
+        <pointLight position={[0, 1.15, 0]} intensity={0.4} color="#ffd88a" distance={4} />
       </group>
 
-      {/* Coffee table — top floats so Roomba drives under */}
-      <group position={[-6, 0, -6.6]}>
+      {/* Coffee table */}
+      <group position={[-4, 0, -3.7]}>
         <mesh position={[0, 0.5, 0]} castShadow>
-          <boxGeometry args={[4.8, 0.1, 3.6]} />
+          <boxGeometry args={[2.8, 0.1, 2.4]} />
           <meshStandardMaterial color={tableTopColor} roughness={0.4} />
         </mesh>
-        {/* Legs */}
         {[
-          [-2.2, -1.6],
-          [2.2, -1.6],
-          [-2.2, 1.6],
-          [2.2, 1.6],
+          [-1.3, -1.1] as const,
+          [1.3, -1.1] as const,
+          [-1.3, 1.1] as const,
+          [1.3, 1.1] as const,
         ].map(([lx, lz], i) => (
           <mesh key={i} position={[lx, 0.25, lz]} castShadow>
-            <cylinderGeometry args={[0.12, 0.12, 0.5, 12]} />
+            <cylinderGeometry args={[0.1, 0.1, 0.5, 12]} />
             <meshStandardMaterial color={tableColor} />
           </mesh>
         ))}
-        {/* Books on table */}
-        <mesh position={[-1, 0.6, -0.5]} castShadow>
-          <boxGeometry args={[1, 0.08, 0.7]} />
+        <mesh position={[-0.6, 0.6, -0.3]} castShadow>
+          <boxGeometry args={[0.8, 0.08, 0.55]} />
           <meshStandardMaterial color="#8b2e2e" />
         </mesh>
-        <mesh position={[-1, 0.7, -0.5]} castShadow>
-          <boxGeometry args={[0.9, 0.08, 0.65]} />
-          <meshStandardMaterial color="#2e4a8b" />
-        </mesh>
-        {/* Coffee mug */}
-        <mesh position={[1.2, 0.65, 0.3]} castShadow>
-          <cylinderGeometry args={[0.12, 0.1, 0.18, 16]} />
+        <mesh position={[0.7, 0.62, 0.2]} castShadow>
+          <cylinderGeometry args={[0.09, 0.075, 0.14, 16]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
       </group>
 
       {/* Dining table */}
-      <group position={[7.75, 0, 0.75]}>
+      <group position={[5, 0, 0.25]}>
         <mesh position={[0, 0.85, 0]} castShadow>
-          <boxGeometry args={[4.4, 0.1, 6]} />
+          <boxGeometry args={[2.8, 0.1, 4]} />
           <meshStandardMaterial color={tableTopColor} roughness={0.4} />
         </mesh>
         {[
-          [-2, -2.85],
-          [2, -2.85],
-          [-2, 2.85],
-          [2, 2.85],
+          [-1.15, -1.65] as const,
+          [1.15, -1.65] as const,
+          [-1.15, 1.65] as const,
+          [1.15, 1.65] as const,
         ].map(([lx, lz], i) => (
           <mesh key={i} position={[lx, 0.425, lz]} castShadow>
-            <cylinderGeometry args={[0.1, 0.1, 0.85, 12]} />
+            <cylinderGeometry args={[0.08, 0.08, 0.85, 12]} />
             <meshStandardMaterial color={tableColor} />
           </mesh>
         ))}
-        {/* Centerpiece bowl */}
         <mesh position={[0, 0.95, 0]} castShadow>
-          <cylinderGeometry args={[0.4, 0.3, 0.15, 16]} />
+          <cylinderGeometry args={[0.3, 0.22, 0.12, 16]} />
           <meshStandardMaterial color="#d4a574" />
         </mesh>
-        {/* Fruit in bowl */}
-        <mesh position={[-0.1, 1.05, 0.05]} castShadow>
-          <sphereGeometry args={[0.1, 12, 12]} />
+        <mesh position={[-0.08, 1.04, 0.04]} castShadow>
+          <sphereGeometry args={[0.08, 12, 12]} />
           <meshStandardMaterial color="#c93030" />
         </mesh>
-        <mesh position={[0.12, 1.05, -0.05]} castShadow>
-          <sphereGeometry args={[0.09, 12, 12]} />
+        <mesh position={[0.1, 1.04, -0.04]} castShadow>
+          <sphereGeometry args={[0.07, 12, 12]} />
           <meshStandardMaterial color="#e6a428" />
-        </mesh>
-        <mesh position={[0.05, 1.05, 0.13]} castShadow>
-          <sphereGeometry args={[0.08, 12, 12]} />
-          <meshStandardMaterial color="#7a9a3a" />
         </mesh>
       </group>
 
-      {/* Chairs with backrests */}
+      {/* Chairs */}
       {[
-        { z: -3.6, faceZ: 1 },
-        { z: 5.1, faceZ: -1 },
+        { z: -2.25, faceZ: 1 },
+        { z: 2.45, faceZ: -1 },
       ].map((c, i) => (
-        <group key={`chair-${i}`} position={[7.75, 0, c.z]}>
+        <group key={`chair-${i}`} position={[5, 0, c.z]}>
           <mesh position={[0, 0.45, 0]} castShadow>
-            <boxGeometry args={[1.5, 0.1, 1.2]} />
+            <boxGeometry args={[1.2, 0.1, 0.9]} />
             <meshStandardMaterial color={chairColor} />
           </mesh>
           {[
-            [-0.65, -0.5],
-            [0.65, -0.5],
-            [-0.65, 0.5],
-            [0.65, 0.5],
+            [-0.5, -0.4] as const,
+            [0.5, -0.4] as const,
+            [-0.5, 0.4] as const,
+            [0.5, 0.4] as const,
           ].map(([lx, lz], j) => (
             <mesh key={j} position={[lx, 0.225, lz]} castShadow>
-              <cylinderGeometry args={[0.05, 0.05, 0.45, 8]} />
+              <cylinderGeometry args={[0.04, 0.04, 0.45, 8]} />
               <meshStandardMaterial color={chairColor} />
             </mesh>
           ))}
-          <mesh position={[0, 1.0, c.faceZ * 0.55]} castShadow>
-            <boxGeometry args={[1.5, 1.0, 0.1]} />
+          <mesh position={[0, 0.95, c.faceZ * 0.4]} castShadow>
+            <boxGeometry args={[1.2, 0.9, 0.08]} />
             <meshStandardMaterial color={chairColor} />
           </mesh>
         </group>
       ))}
 
       {/* TV stand & TV */}
-      <group position={[0, 0, 12]}>
+      <group position={[0, 0, 7.15]}>
         <mesh position={[0, 0.4, 0]} castShadow>
-          <boxGeometry args={[8, 0.8, 1]} />
+          <boxGeometry args={[6, 0.8, 0.7]} />
           <meshStandardMaterial color={tvColor} roughness={0.5} />
         </mesh>
-        {/* Drawers detail */}
-        {[-2.5, 0, 2.5].map((dx, i) => (
-          <mesh key={i} position={[dx, 0.4, 0.51]}>
-            <boxGeometry args={[1.8, 0.6, 0.02]} />
+        {[-2, 0, 2].map((dx, i) => (
+          <mesh key={i} position={[dx, 0.4, 0.36]}>
+            <boxGeometry args={[1.5, 0.6, 0.02]} />
             <meshStandardMaterial color="#2a2a2a" />
           </mesh>
         ))}
-        {/* TV */}
-        <mesh position={[0, 1.9, 0.3]} castShadow>
-          <boxGeometry args={[4.5, 2.4, 0.12]} />
+        <mesh position={[0, 1.7, 0.2]} castShadow>
+          <boxGeometry args={[3.6, 2, 0.1]} />
           <meshStandardMaterial color="#0a0a0a" />
         </mesh>
-        {/* TV screen — emissive */}
-        <mesh position={[0, 1.9, 0.37]}>
-          <planeGeometry args={[4.2, 2.2]} />
+        <mesh position={[0, 1.7, 0.26]}>
+          <planeGeometry args={[3.4, 1.85]} />
           <meshBasicMaterial color="#1a4a7c" toneMapped={false} />
         </mesh>
-        {/* TV stand */}
-        <mesh position={[0, 0.95, 0.2]} castShadow>
-          <boxGeometry args={[0.4, 0.3, 0.3]} />
-          <meshStandardMaterial color="#1a1a1a" />
-        </mesh>
-        {/* Decorative items on stand */}
-        <mesh position={[3, 0.95, 0]} castShadow>
-          <cylinderGeometry args={[0.15, 0.2, 0.4, 16]} />
+        <mesh position={[2.4, 0.95, 0]} castShadow>
+          <cylinderGeometry args={[0.13, 0.18, 0.35, 16]} />
           <meshStandardMaterial color="#d4a574" />
-        </mesh>
-        <mesh position={[-3, 0.95, 0]} castShadow>
-          <boxGeometry args={[0.6, 0.4, 0.3]} />
-          <meshStandardMaterial color="#5a3e7a" />
         </mesh>
       </group>
 
       {/* Bookshelf on left wall */}
-      <group position={[-12.05, 0, 1]}>
-        {/* Frame */}
-        <mesh position={[0, 1.2, 0]} castShadow>
-          <boxGeometry args={[0.4, 2.4, 6]} />
+      <group position={[-7.2, 0, 2]}>
+        <mesh position={[0, 1.1, 0]} castShadow>
+          <boxGeometry args={[0.4, 2.2, 4]} />
           <meshStandardMaterial color={tableColor} />
         </mesh>
-        {/* Shelves (lighter strips) */}
-        {[0.4, 0.95, 1.5, 2.05].map((sy, i) => (
+        {[0.4, 0.95, 1.5, 2.0].map((sy, i) => (
           <mesh key={i} position={[0.05, sy, 0]}>
-            <boxGeometry args={[0.35, 0.04, 5.9]} />
+            <boxGeometry args={[0.35, 0.04, 3.9]} />
             <meshStandardMaterial color="#3a2515" />
           </mesh>
         ))}
-        {/* Books — generated rows */}
-        {[0.65, 1.2, 1.75, 2.3].map((shelfY, si) =>
-          Array.from({ length: 14 }).map((_, bi) => {
-            const z = -2.7 + bi * 0.4;
+        {[0.65, 1.2, 1.75].map((shelfY, si) =>
+          Array.from({ length: 10 }).map((_, bi) => {
+            const z = -1.8 + bi * 0.4;
             const h = 0.35 + ((si * 7 + bi) % 4) * 0.04;
-            const w = 0.25 + ((si * 3 + bi) % 5) * 0.03;
+            const w = 0.22 + ((si * 3 + bi) % 5) * 0.03;
             const c = bookColors[(si * 5 + bi) % bookColors.length];
             return (
               <mesh key={`b-${si}-${bi}`} position={[0.1, shelfY, z]}>
@@ -404,60 +373,108 @@ export const Apartment = () => {
         )}
       </group>
 
-      {/* Potted plant — bigger, more detailed */}
-      <group position={[12, 0, -11.8]}>
-        <mesh position={[0, 0.5, 0]} castShadow>
-          <cylinderGeometry args={[0.6, 0.45, 1.0, 16]} />
+      {/* Potted plant */}
+      <group position={[7, 0, -7]}>
+        <mesh position={[0, 0.4, 0]} castShadow>
+          <cylinderGeometry args={[0.45, 0.35, 0.8, 16]} />
           <meshStandardMaterial color={plantPotColor} roughness={0.7} />
         </mesh>
-        {/* Soil */}
-        <mesh position={[0, 1.0, 0]}>
-          <cylinderGeometry args={[0.55, 0.55, 0.05, 16]} />
+        <mesh position={[0, 0.8, 0]}>
+          <cylinderGeometry args={[0.42, 0.42, 0.05, 16]} />
           <meshStandardMaterial color="#3a2515" />
         </mesh>
-        {/* Foliage clusters */}
-        <mesh position={[0, 1.6, 0]} castShadow>
-          <sphereGeometry args={[0.7, 16, 16]} />
+        <mesh position={[0, 1.3, 0]} castShadow>
+          <sphereGeometry args={[0.55, 16, 16]} />
           <meshStandardMaterial color={plantLeafColor} />
         </mesh>
-        <mesh position={[0.4, 2.0, 0.1]} castShadow>
-          <sphereGeometry args={[0.5, 12, 12]} />
+        <mesh position={[0.3, 1.6, 0.1]} castShadow>
+          <sphereGeometry args={[0.4, 12, 12]} />
           <meshStandardMaterial color="#4d8a4d" />
         </mesh>
-        <mesh position={[-0.35, 1.95, -0.15]} castShadow>
-          <sphereGeometry args={[0.45, 12, 12]} />
+        <mesh position={[-0.25, 1.55, -0.1]} castShadow>
+          <sphereGeometry args={[0.35, 12, 12]} />
           <meshStandardMaterial color="#356b35" />
         </mesh>
-        <mesh position={[0.05, 2.4, 0.2]} castShadow>
-          <sphereGeometry args={[0.4, 12, 12]} />
-          <meshStandardMaterial color="#5aa05a" />
-        </mesh>
       </group>
 
-      {/* Floor lamp */}
-      <group position={[11.7, 0, 10.8]}>
-        <mesh position={[0, 0.05, 0]} castShadow>
-          <cylinderGeometry args={[0.3, 0.3, 0.1, 16]} />
-          <meshStandardMaterial color="#1a1a1a" />
-        </mesh>
-        <mesh position={[0, 1.0, 0]}>
-          <cylinderGeometry args={[0.03, 0.03, 1.9, 8]} />
-          <meshStandardMaterial color="#1a1a1a" />
-        </mesh>
-        <mesh position={[0, 2.05, 0]} castShadow>
-          <coneGeometry args={[0.4, 0.5, 16, 1, true]} />
-          <meshStandardMaterial color="#fff5d6" emissive="#ffd88a" emissiveIntensity={0.5} side={THREE.DoubleSide} />
-        </mesh>
-        <pointLight position={[0, 2.0, 0]} intensity={0.5} color="#ffd88a" distance={6} />
-      </group>
-
-      {/* Sunbeam from window — directional warm light */}
+      {/* Bright sunbeams from windows */}
       <directionalLight
-        position={[ROOM_HALF + 2, 3, 4]}
-        intensity={0.8}
+        position={[ROOM_HALF + 3, 4, 3]}
+        intensity={0.9}
         color="#fff0c8"
         target-position={[-3, 0, 0]}
       />
+      <directionalLight
+        position={[5, 4, ROOM_HALF + 3]}
+        intensity={0.5}
+        color="#fff0c8"
+        target-position={[0, 0, 0]}
+      />
+      {/* Sunlight pool on floor near east window — subtle warm patch */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[5, 0.012, 3]}>
+        <planeGeometry args={[3, 4]} />
+        <meshBasicMaterial color="#ffe8b0" transparent opacity={0.18} blending={THREE.AdditiveBlending} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[5, 0.012, 6.5]}>
+        <planeGeometry args={[2.5, 2.5]} />
+        <meshBasicMaterial color="#ffe8b0" transparent opacity={0.14} blending={THREE.AdditiveBlending} />
+      </mesh>
+    </group>
+  );
+};
+
+interface WindowProps {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  width: number;
+  height: number;
+  tex: THREE.Texture;
+}
+const Window = ({ position, rotation, width, height, tex }: WindowProps) => {
+  const halfW = width / 2;
+  const halfH = height / 2;
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh position={[0, 0, -0.18]}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial map={tex} toneMapped={false} />
+      </mesh>
+      {/* Frame */}
+      <mesh position={[0, halfH + 0.07, 0]}>
+        <boxGeometry args={[width + 0.3, 0.14, 0.1]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[0, -halfH - 0.07, 0]}>
+        <boxGeometry args={[width + 0.3, 0.14, 0.15]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[-halfW - 0.07, 0, 0]}>
+        <boxGeometry args={[0.14, height + 0.3, 0.1]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[halfW + 0.07, 0, 0]}>
+        <boxGeometry args={[0.14, height + 0.3, 0.1]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      {/* Mullions */}
+      <mesh position={[0, 0, 0.01]}>
+        <boxGeometry args={[0.05, height, 0.05]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[0, 0, 0.01]}>
+        <boxGeometry args={[width, 0.05, 0.05]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      {/* Sill */}
+      <mesh position={[0, -halfH - 0.13, 0.18]}>
+        <boxGeometry args={[width + 0.4, 0.07, 0.3]} />
+        <meshStandardMaterial color="#f5f5f5" />
+      </mesh>
+      {/* Sun glow */}
+      <mesh position={[0, 0, 0.04]}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial color="#fff4d0" transparent opacity={0.08} />
+      </mesh>
     </group>
   );
 };

@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame, useLoader } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { ROOM_HALF, SOLID_OBSTACLES, ROOMBA_RADIUS } from "./obstacles";
 import { useGameStore } from "./useGameStore";
-import dustUrl from "@/assets/dust.png";
 
 const GRID = 70;
 const CELL = (ROOM_HALF * 2) / GRID;
@@ -22,12 +21,16 @@ interface Props {
   active: boolean;
 }
 
+/**
+ * Cleaned trail visualization: instead of removing dust sprites, we now SHOW
+ * a glossy "wet" shine sprite on cells that have been cleaned. The base floor
+ * is always visible; cleaned cells get a soft highlight quad on top.
+ */
 export const DirtField = ({ playerRef, active }: Props) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const setProgress = useGameStore((s) => s.setProgress);
   const bumpCells = useGameStore((s) => s.bumpCells);
 
-  // Build cells: include only non-blocked cells
   const { cells, total } = useMemo(() => {
     const list: { x: number; z: number; idx: number }[] = [];
     for (let iz = 0; iz < GRID; iz++) {
@@ -41,16 +44,30 @@ export const DirtField = ({ playerRef, active }: Props) => {
     return { cells: list, total: list.length };
   }, []);
 
-  // Track cleaned state per instance
   const cleanedRef = useRef<Uint8Array>(new Uint8Array(cells.length));
   const cleanedCountRef = useRef(0);
 
-  // Expose cleaned grid for minimap (sparse map idx -> cleaned)
-  const cellMapRef = useRef<Map<number, boolean>>(new Map());
+  // Reuseable matrices
+  const visibleMatricesRef = useRef<THREE.Matrix4[]>([]);
+  const zeroMatrix = useMemo(() => new THREE.Matrix4().makeScale(0, 0, 0), []);
 
+  // Build precomputed "shine" matrices for every cell (we'll swap them in when cleaned)
   useEffect(() => {
-    cellMapRef.current = new Map();
-    cells.forEach((c, i) => cellMapRef.current.set(c.idx, false));
+    const arr: THREE.Matrix4[] = [];
+    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0));
+    const scl = new THREE.Vector3(1, 1, 1);
+    const pos = new THREE.Vector3();
+    cells.forEach((c) => {
+      const m = new THREE.Matrix4();
+      pos.set(c.x, 0.012, c.z);
+      m.compose(pos, q, scl);
+      arr.push(m);
+    });
+    visibleMatricesRef.current = arr;
+  }, [cells]);
+
+  // Expose cleaned grid for minimap
+  useEffect(() => {
     (window as unknown as { __dirtCells?: { cells: typeof cells; cleaned: Uint8Array; grid: number } }).__dirtCells = {
       cells,
       cleaned: cleanedRef.current,
@@ -58,7 +75,6 @@ export const DirtField = ({ playerRef, active }: Props) => {
     };
   }, [cells]);
 
-  // Reset on game restart
   const status = useGameStore((s) => s.status);
   useEffect(() => {
     if (status === "idle" || status === "playing") {
@@ -66,25 +82,10 @@ export const DirtField = ({ playerRef, active }: Props) => {
       cleanedCountRef.current = 0;
       const mesh = meshRef.current;
       if (mesh) {
-        const m = new THREE.Matrix4();
-        const q = new THREE.Quaternion();
-        const eul = new THREE.Euler();
-        const scl = new THREE.Vector3();
-        const pos = new THREE.Vector3();
-        cells.forEach((c, i) => {
-          const jx = (Math.sin(i * 12.9898) * 43758.5453) % 1;
-          const jz = (Math.cos(i * 78.233) * 12345.6789) % 1;
-          const ox = (jx - 0.5) * CELL * 0.4;
-          const oz = (jz - 0.5) * CELL * 0.4;
-          const s = 0.7 + Math.abs(jx) * 0.6;
-          // Lay flat on floor (rotate -90° X) + random yaw around Y
-          eul.set(-Math.PI / 2, 0, jx * Math.PI * 2);
-          q.setFromEuler(eul);
-          scl.set(s, s, s);
-          pos.set(c.x + ox, 0.008, c.z + oz);
-          m.compose(pos, q, scl);
-          mesh.setMatrixAt(i, m);
-        });
+        // Hide all instances initially (nothing cleaned yet)
+        for (let i = 0; i < cells.length; i++) {
+          mesh.setMatrixAt(i, zeroMatrix);
+        }
         mesh.instanceMatrix.needsUpdate = true;
         mesh.count = cells.length;
       }
@@ -95,13 +96,15 @@ export const DirtField = ({ playerRef, active }: Props) => {
       setProgress(0, cells.length);
       bumpCells();
     }
-  }, [status, cells, setProgress, bumpCells]);
-
-  // Hide instance by scaling to 0
-  const tmpMatrix = useMemo(() => new THREE.Matrix4(), []);
-  const zeroMatrix = useMemo(() => new THREE.Matrix4().makeScale(0, 0, 0), []);
+  }, [status, cells, setProgress, bumpCells, zeroMatrix]);
 
   const lastBump = useRef(0);
+  const idxMapRef = useRef<Map<number, number>>(new Map());
+  useEffect(() => {
+    const m = new Map<number, number>();
+    cells.forEach((c, i) => m.set(c.idx, i));
+    idxMapRef.current = m;
+  }, [cells]);
 
   useFrame(() => {
     if (!active) return;
@@ -112,13 +115,13 @@ export const DirtField = ({ playerRef, active }: Props) => {
     const r = ROOMBA_RADIUS;
     const r2 = r * r;
 
-    // Compute candidate cells in bounding box
     const minIx = Math.max(0, Math.floor((px - r + ROOM_HALF) / CELL));
     const maxIx = Math.min(GRID - 1, Math.floor((px + r + ROOM_HALF) / CELL));
     const minIz = Math.max(0, Math.floor((pz - r + ROOM_HALF) / CELL));
     const maxIz = Math.min(GRID - 1, Math.floor((pz + r + ROOM_HALF) / CELL));
 
     let cleanedThisFrame = 0;
+    const visMats = visibleMatricesRef.current;
     for (let iz = minIz; iz <= maxIz; iz++) {
       for (let ix = minIx; ix <= maxIx; ix++) {
         const cx = cellCenter(ix);
@@ -126,13 +129,12 @@ export const DirtField = ({ playerRef, active }: Props) => {
         const dx = cx - px;
         const dz = cz - pz;
         if (dx * dx + dz * dz > r2) continue;
-        // Find instance index for this cell (linear search is OK because bbox is tiny)
-        // We'll use a precomputed map for speed.
         const instanceIdx = idxMapRef.current.get(iz * GRID + ix);
         if (instanceIdx === undefined) continue;
         if (cleanedRef.current[instanceIdx]) continue;
         cleanedRef.current[instanceIdx] = 1;
-        mesh.setMatrixAt(instanceIdx, zeroMatrix);
+        // Show this shine instance
+        mesh.setMatrixAt(instanceIdx, visMats[instanceIdx]);
         cleanedThisFrame++;
       }
     }
@@ -147,21 +149,25 @@ export const DirtField = ({ playerRef, active }: Props) => {
         lastBump.current = now;
       }
     }
-    // expose suction intensity (how much cleaning happening)
     (window as unknown as { __cleaningRate?: number }).__cleaningRate = cleanedThisFrame;
-    // suppress unused warning
-    void tmpMatrix;
   });
 
-  // Build idx -> instanceIndex map
-  const idxMapRef = useRef<Map<number, number>>(new Map());
-  useEffect(() => {
-    const m = new Map<number, number>();
-    cells.forEach((c, i) => m.set(c.idx, i));
-    idxMapRef.current = m;
-  }, [cells]);
-
-  const dustTex = useLoader(THREE.TextureLoader, dustUrl);
+  // Procedural radial-glow texture for that "wet shine" look
+  const shineTexture = useMemo(() => {
+    const size = 64;
+    const c = document.createElement("canvas");
+    c.width = c.height = size;
+    const ctx = c.getContext("2d")!;
+    const grd = ctx.createRadialGradient(size / 2, size / 2, 2, size / 2, size / 2, size / 2);
+    grd.addColorStop(0, "rgba(255,255,255,0.85)");
+    grd.addColorStop(0.4, "rgba(220,240,255,0.45)");
+    grd.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, size, size);
+    const tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }, []);
 
   return (
     <instancedMesh
@@ -169,13 +175,13 @@ export const DirtField = ({ playerRef, active }: Props) => {
       args={[undefined, undefined, cells.length]}
       frustumCulled={false}
     >
-      <planeGeometry args={[CELL * 1.6, CELL * 1.6]} />
+      <planeGeometry args={[CELL * 1.7, CELL * 1.7]} />
       <meshBasicMaterial
-        map={dustTex}
+        map={shineTexture}
         transparent
-        opacity={0.9}
+        opacity={0.55}
         depthWrite={false}
-        alphaTest={0.05}
+        blending={THREE.AdditiveBlending}
       />
     </instancedMesh>
   );

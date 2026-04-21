@@ -29,7 +29,7 @@ export const StartScreen = () => {
         <div className="mb-2 text-6xl">🤖</div>
         <h1 className="mb-2 text-3xl font-bold text-white">Roomba Speed Clean</h1>
         <p className="mb-6 text-sm text-white/70">
-          You ARE the vacuum. Race the clock to clean every speck of dust in the apartment.
+          You ARE the vacuum. Race the clock to leave a shiny clean trail behind you.
         </p>
 
         <div className="mb-6 rounded-lg bg-white/5 p-4 text-left text-sm text-white/80">
@@ -46,6 +46,10 @@ export const StartScreen = () => {
             <span className="text-white/60">R</span>
             <span>Restart</span>
           </div>
+          <div className="mt-3 border-t border-white/10 pt-3 text-xs text-amber-200/90 space-y-1">
+            <div>⚠️ Hitting walls/furniture damages you (+time penalty)</div>
+            <div>🐈 Don't hit the cat — instant game over!</div>
+          </div>
         </div>
 
         {bestMs !== null && (
@@ -61,7 +65,6 @@ export const StartScreen = () => {
         >
           Start Cleaning
         </button>
-        <p className="mt-3 text-xs text-white/50">Tip: check the mini-map for missed spots under furniture.</p>
       </div>
     </div>
   );

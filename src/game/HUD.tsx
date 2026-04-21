@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useGameStore } from "./useGameStore";
+import { useGameStore, DAMAGE_MS_PER_POINT } from "./useGameStore";
 import { MiniMap } from "./MiniMap";
 
 const formatTime = (ms: number): string => {
@@ -14,6 +14,8 @@ const formatTime = (ms: number): string => {
 export const HUD = () => {
   const elapsedMs = useGameStore((s) => s.elapsedMs);
   const progress = useGameStore((s) => s.progress);
+  const damage = useGameStore((s) => s.damage);
+  const damageMs = useGameStore((s) => s.damageMs);
   const status = useGameStore((s) => s.status);
   const [hintsVisible, setHintsVisible] = useState(true);
 
@@ -29,6 +31,9 @@ export const HUD = () => {
   if (status !== "playing") return null;
 
   const pct = Math.round(progress * 100);
+  const damagePct = Math.round(damage);
+  const damageColor =
+    damage < 30 ? "from-emerald-400 to-yellow-300" : damage < 70 ? "from-yellow-400 to-orange-400" : "from-orange-500 to-red-500";
 
   return (
     <div className="pointer-events-none fixed inset-0 z-30 select-none">
@@ -38,6 +43,11 @@ export const HUD = () => {
         <div className="font-mono text-2xl font-bold text-white tabular-nums">
           {formatTime(elapsedMs)}
         </div>
+        {damageMs > 0 && (
+          <div className="font-mono text-xs text-red-400">
+            +{(damageMs / 1000).toFixed(1)}s penalty
+          </div>
+        )}
       </div>
 
       {/* Progress */}
@@ -50,6 +60,17 @@ export const HUD = () => {
           <div
             className="h-full bg-gradient-to-r from-emerald-400 to-cyan-300 transition-all duration-150"
             style={{ width: `${pct}%` }}
+          />
+        </div>
+        {/* Damage meter */}
+        <div className="mt-2 mb-1 flex items-center justify-between text-xs uppercase tracking-widest text-white/60">
+          <span>Damage</span>
+          <span className="font-mono text-white">{damagePct}%</span>
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+          <div
+            className={`h-full bg-gradient-to-r ${damageColor} transition-all duration-150`}
+            style={{ width: `${damagePct}%` }}
           />
         </div>
       </div>
@@ -70,8 +91,10 @@ export const HUD = () => {
       >
         <span className="font-mono">WASD</span> move ·{" "}
         <span className="font-mono">Shift</span> boost ·{" "}
-        <span className="font-mono">R</span> restart
+        <span className="font-mono">R</span> restart · ⚠️ avoid the cat!
       </div>
     </div>
   );
 };
+
+export { DAMAGE_MS_PER_POINT };
