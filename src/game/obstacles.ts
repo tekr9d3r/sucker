@@ -7,31 +7,41 @@ export interface AABB {
   maxZ: number;
 }
 
-export const ROOM_HALF = 10; // 20x20 room
+export const ROOM_HALF = 13; // 26x26 room — more apartment-like
+export const ROOM_HEIGHT = 2.7; // realistic ceiling
 export const WALL_THICKNESS = 0.3;
 export const ROOMBA_RADIUS = 0.4;
 
 // Solid obstacles (Roomba cannot pass)
 export const SOLID_OBSTACLES: AABB[] = [
-  // Sofa (back wall, big)
-  { minX: -8, maxX: -2, minZ: -9.5, maxZ: -8 },
+  // Sofa (back wall, big L-shape main piece)
+  { minX: -10, maxX: -3, minZ: -12.5, maxZ: -10.7 },
+  // Sofa armrests
+  { minX: -10.4, maxX: -10, minZ: -12.5, maxZ: -10.5 },
+  { minX: -3, maxX: -2.6, minZ: -12.5, maxZ: -10.5 },
   // TV stand (opposite wall)
-  { minX: -3, maxX: 3, minZ: 8.5, maxZ: 9.5 },
+  { minX: -4, maxX: 4, minZ: 11.5, maxZ: 12.5 },
+  // Bookshelf (left wall)
+  { minX: -12.5, maxX: -11.6, minZ: -2, maxZ: 4 },
+  // Side table next to sofa
+  { minX: -2, maxX: -1.2, minZ: -12.2, maxZ: -11.4 },
   // Potted plant (corner)
-  { minX: 8.2, maxX: 9.4, minZ: -9.4, maxZ: -8.2 },
+  { minX: 11.4, maxX: 12.6, minZ: -12.4, maxZ: -11.2 },
+  // Floor lamp (corner near TV)
+  { minX: 11.4, maxX: 12, minZ: 10.5, maxZ: 11.1 },
   // Coffee table legs (4 cylinders, in front of sofa)
-  { minX: -6.3, maxX: -5.9, minZ: -6.3, maxZ: -5.9 },
-  { minX: -3.1, maxX: -2.7, minZ: -6.3, maxZ: -5.9 },
-  { minX: -6.3, maxX: -5.9, minZ: -3.7, maxZ: -3.3 },
-  { minX: -3.1, maxX: -2.7, minZ: -3.7, maxZ: -3.3 },
+  { minX: -8.3, maxX: -7.9, minZ: -8.3, maxZ: -7.9 },
+  { minX: -4.1, maxX: -3.7, minZ: -8.3, maxZ: -7.9 },
+  { minX: -8.3, maxX: -7.9, minZ: -5.3, maxZ: -4.9 },
+  { minX: -4.1, maxX: -3.7, minZ: -5.3, maxZ: -4.9 },
   // Dining table legs (right side)
-  { minX: 3.7, maxX: 4.1, minZ: -1.3, maxZ: -0.9 },
-  { minX: 6.9, maxX: 7.3, minZ: -1.3, maxZ: -0.9 },
-  { minX: 3.7, maxX: 4.1, minZ: 2.9, maxZ: 3.3 },
-  { minX: 6.9, maxX: 7.3, minZ: 2.9, maxZ: 3.3 },
+  { minX: 5.7, maxX: 6.1, minZ: -2.3, maxZ: -1.9 },
+  { minX: 9.4, maxX: 9.8, minZ: -2.3, maxZ: -1.9 },
+  { minX: 5.7, maxX: 6.1, minZ: 3.4, maxZ: 3.8 },
+  { minX: 9.4, maxX: 9.8, minZ: 3.4, maxZ: 3.8 },
   // Chairs (solid base)
-  { minX: 4.9, maxX: 6.1, minZ: -3, maxZ: -2 },
-  { minX: 4.9, maxX: 6.1, minZ: 4, maxZ: 5 },
+  { minX: 7, maxX: 8.5, minZ: -4.2, maxZ: -3 },
+  { minX: 7, maxX: 8.5, minZ: 4.5, maxZ: 5.7 },
 ];
 
 // Walls (4)
