@@ -19,6 +19,16 @@ export const Route = createFileRoute("/")({
         content:
           "Immersive 1st-person vacuum racing game. WASD to move, Shift to boost, clean every cell as fast as you can.",
       },
+      { property: "og:image", content: "/og-image.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:image", content: "/og-image.png" },
+      { name: "twitter:title", content: "Vacuum Game — 1st-Person Speed Cleaning" },
+      {
+        name: "twitter:description",
+        content:
+          "You are the vacuum. Race the clock and sweep every speck of dust in the apartment.",
+      },
     ],
   }),
 });
