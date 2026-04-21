@@ -40,8 +40,8 @@ const loadBest = (): number | null => {
   return v ? Number(v) : null;
 };
 
-// Each damage point = 100ms (0.1s) added to final time. 100 damage = 10 sec penalty.
-export const DAMAGE_MS_PER_POINT = 100;
+// 100 damage = 60 sec penalty → 600ms per damage point.
+export const DAMAGE_MS_PER_POINT = 600;
 
 export const useGameStore = create<GameState>((set, get) => ({
   status: "idle",
