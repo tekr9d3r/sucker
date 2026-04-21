@@ -504,57 +504,59 @@ export const Apartment = () => {
         </group>
       ))}
 
-      {/* TV stand & TV with AV gear — redesigned, pulled into room, screen faces -Z */}
-      <group position={[0, 0, 6.2]}>
-        {/* === Cabinet === */}
-        {/* Top surface */}
-        <mesh position={[0, 0.82, 0]} castShadow receiveShadow>
-          <boxGeometry args={[3.6, 0.06, 0.9]} />
-          <meshStandardMaterial color="#3a2515" roughness={0.5} />
-        </mesh>
-        {/* Bottom shelf */}
-        <mesh position={[0, 0.42, 0]} castShadow receiveShadow>
-          <boxGeometry args={[3.6, 0.04, 0.9]} />
-          <meshStandardMaterial color="#3a2515" roughness={0.5} />
-        </mesh>
-        {/* Back panel */}
-        <mesh position={[0, 0.6, -0.42]} castShadow>
-          <boxGeometry args={[3.6, 0.5, 0.05]} />
-          <meshStandardMaterial color="#2a1a0c" roughness={0.7} />
-        </mesh>
-        {/* Side panels */}
-        {[-1.78, 1.78].map((sx, i) => (
-          <mesh key={`tvside-${i}`} position={[sx, 0.6, 0]} castShadow>
-            <boxGeometry args={[0.04, 0.5, 0.9]} />
+      {/* TV stand & TV with AV gear — cabinet flipped so doors face player; pushed to wall; tall legs for Roomba clearance */}
+      <group position={[0, 0, 6.55]}>
+        {/* Cabinet sub-group, rotated 180° so the door/front face -Z (toward player) */}
+        <group rotation={[0, Math.PI, 0]}>
+          {/* Top surface — raised to allow vacuum clearance underneath */}
+          <mesh position={[0, 1.05, 0]} castShadow receiveShadow>
+            <boxGeometry args={[3.6, 0.06, 0.9]} />
+            <meshStandardMaterial color="#3a2515" roughness={0.5} />
+          </mesh>
+          {/* Bottom shelf */}
+          <mesh position={[0, 0.65, 0]} castShadow receiveShadow>
+            <boxGeometry args={[3.6, 0.04, 0.9]} />
+            <meshStandardMaterial color="#3a2515" roughness={0.5} />
+          </mesh>
+          {/* Back panel (now faces +Z in world after rotation = wall side) */}
+          <mesh position={[0, 0.83, -0.42]} castShadow>
+            <boxGeometry args={[3.6, 0.4, 0.05]} />
+            <meshStandardMaterial color="#2a1a0c" roughness={0.7} />
+          </mesh>
+          {/* Side panels */}
+          {[-1.78, 1.78].map((sx, i) => (
+            <mesh key={`tvside-${i}`} position={[sx, 0.83, 0]} castShadow>
+              <boxGeometry args={[0.04, 0.4, 0.9]} />
+              <meshStandardMaterial color="#3a2515" />
+            </mesh>
+          ))}
+          {/* Vertical divider */}
+          <mesh position={[-0.5, 0.83, 0]}>
+            <boxGeometry args={[0.04, 0.4, 0.9]} />
             <meshStandardMaterial color="#3a2515" />
           </mesh>
-        ))}
-        {/* Vertical divider creating left cabinet + open right shelf */}
-        <mesh position={[-0.5, 0.6, 0]}>
-          <boxGeometry args={[0.04, 0.5, 0.9]} />
-          <meshStandardMaterial color="#3a2515" />
-        </mesh>
-        {/* Closed cabinet door (left) */}
-        <mesh position={[-1.15, 0.6, 0.46]}>
-          <boxGeometry args={[1.2, 0.48, 0.025]} />
-          <meshStandardMaterial color="#4a3020" roughness={0.6} />
-        </mesh>
-        <mesh position={[-0.65, 0.6, 0.48]}>
-          <sphereGeometry args={[0.025, 12, 12]} />
-          <meshStandardMaterial color="#c9a040" metalness={0.8} roughness={0.3} />
-        </mesh>
-        {/* Cabinet legs */}
-        {[
-          [-1.7, -0.4],
-          [1.7, -0.4],
-          [-1.7, 0.4],
-          [1.7, 0.4],
-        ].map(([lx, lz], i) => (
-          <mesh key={`tvleg-${i}`} position={[lx, 0.2, lz]} castShadow>
-            <boxGeometry args={[0.08, 0.4, 0.08]} />
-            <meshStandardMaterial color="#2a1a0c" />
+          {/* Closed cabinet door — front of cabinet (after rotation, faces player) */}
+          <mesh position={[-1.15, 0.83, 0.46]}>
+            <boxGeometry args={[1.2, 0.38, 0.025]} />
+            <meshStandardMaterial color="#4a3020" roughness={0.6} />
           </mesh>
-        ))}
+          <mesh position={[-0.65, 0.83, 0.48]}>
+            <sphereGeometry args={[0.025, 12, 12]} />
+            <meshStandardMaterial color="#c9a040" metalness={0.8} roughness={0.3} />
+          </mesh>
+          {/* Tall legs — leave clearance under cabinet for vacuuming */}
+          {[
+            [-1.7, -0.4],
+            [1.7, -0.4],
+            [-1.7, 0.4],
+            [1.7, 0.4],
+          ].map(([lx, lz], i) => (
+            <mesh key={`tvleg-${i}`} position={[lx, 0.31, lz]} castShadow>
+              <boxGeometry args={[0.08, 0.62, 0.08]} />
+              <meshStandardMaterial color="#2a1a0c" />
+            </mesh>
+          ))}
+        </group>
 
         {/* === VCR (on right side of bottom shelf) === */}
         <group position={[0.7, 0.5, 0.05]}>
