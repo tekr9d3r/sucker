@@ -20,8 +20,8 @@ export const ROOMBA_RADIUS = 0.4 * _S;
 export const DOOR_X_MIN = 3.2 * _S;
 export const DOOR_X_MAX = 4.8 * _S;
 
-// Solid obstacles (Roomba cannot pass)
-export const SOLID_OBSTACLES: AABB[] = [
+// Solid obstacles (Roomba cannot pass) — defined in unscaled units, then scaled
+const RAW_OBSTACLES: AABB[] = [
   // Sofa
   { minX: -7, maxX: -2, minZ: -7.5, maxZ: -6.2 },
   { minX: -7.4, maxX: -7, minZ: -7.5, maxZ: -6 },
@@ -48,6 +48,12 @@ export const SOLID_OBSTACLES: AABB[] = [
   { minX: 4.4, maxX: 5.6, minZ: -2.7, maxZ: -1.8 },
   { minX: 4.4, maxX: 5.6, minZ: 2.0, maxZ: 2.9 },
 ];
+export const SOLID_OBSTACLES: AABB[] = RAW_OBSTACLES.map((b) => ({
+  minX: b.minX * _S,
+  maxX: b.maxX * _S,
+  minZ: b.minZ * _S,
+  maxZ: b.maxZ * _S,
+}));
 
 // Walls — split north wall into two segments to leave a door opening
 export const WALLS: AABB[] = [
