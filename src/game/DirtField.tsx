@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 import { ROOM_HALF, SOLID_OBSTACLES, ROOMBA_RADIUS } from "./obstacles";
 import { useGameStore } from "./useGameStore";
+import dustUrl from "@/assets/dust.png";
 
-const GRID = 60;
-const CELL = (ROOM_HALF * 2) / GRID; // ~0.333
+const GRID = 70;
+const CELL = (ROOM_HALF * 2) / GRID;
 
 const cellCenter = (i: number) => -ROOM_HALF + (i + 0.5) * CELL;
 
@@ -153,10 +154,24 @@ export const DirtField = ({ playerRef, active }: Props) => {
     idxMapRef.current = m;
   }, [cells]);
 
+  const dustTex = useLoader(THREE.TextureLoader, dustUrl);
+
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, cells.length]} frustumCulled={false}>
-      <circleGeometry args={[CELL * 0.45, 6]} />
-      <meshBasicMaterial color="#3a2a18" transparent opacity={0.7} />
+    <instancedMesh
+      ref={meshRef}
+      args={[undefined, undefined, cells.length]}
+      frustumCulled={false}
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, 0.008, 0]}
+    >
+      <planeGeometry args={[CELL * 1.5, CELL * 1.5]} />
+      <meshBasicMaterial
+        map={dustTex}
+        transparent
+        opacity={0.85}
+        depthWrite={false}
+        alphaTest={0.05}
+      />
     </instancedMesh>
   );
 };
