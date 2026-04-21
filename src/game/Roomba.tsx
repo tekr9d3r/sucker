@@ -70,8 +70,8 @@ export const Roomba = ({ playerRef, onShake }: Props) => {
     const targetVel = inputAccel * maxSpeed;
     velRef.current += (targetVel - velRef.current) * Math.min(1, dt * 6);
 
-    const dx = Math.sin(angleRef.current) * velRef.current * dt;
-    const dz = Math.cos(angleRef.current) * velRef.current * dt;
+    const dx = -Math.sin(angleRef.current) * velRef.current * dt;
+    const dz = -Math.cos(angleRef.current) * velRef.current * dt;
     const oldX = playerRef.current.x;
     const oldZ = playerRef.current.z;
     const newX = oldX + dx;
