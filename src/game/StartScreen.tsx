@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useGameStore } from "./useGameStore";
 import { resumeAudio, startSuction } from "./audio";
-import { getTopScore, type TopScore } from "@/server/leaderboard.functions";
+import { getLeaderboard, type LeaderboardEntry } from "@/server/leaderboard.functions";
 import vacuumLogo from "@/assets/vacuum-game-logo.png";
 
 const formatTime = (ms: number): string => {
@@ -21,8 +21,8 @@ export const StartScreen = () => {
   const playerName = useGameStore((s) => s.playerName);
   const setPlayerName = useGameStore((s) => s.setPlayerName);
 
-  const getTopScoreFn = useServerFn(getTopScore);
-  const [top, setTop] = useState<TopScore>(null);
+  const getLeaderboardFn = useServerFn(getLeaderboard);
+  const [topList, setTopList] = useState<LeaderboardEntry[]>([]);
   const [topLoading, setTopLoading] = useState(true);
 
   // Auto-start when arriving from a portal (?portal=true)
@@ -44,12 +44,12 @@ export const StartScreen = () => {
     if (status !== "idle") return;
     let cancelled = false;
     setTopLoading(true);
-    getTopScoreFn()
+    getLeaderboardFn({ data: {} })
       .then((res) => {
-        if (!cancelled) setTop(res);
+        if (!cancelled) setTopList(res.top);
       })
       .catch(() => {
-        if (!cancelled) setTop(null);
+        if (!cancelled) setTopList([]);
       })
       .finally(() => {
         if (!cancelled) setTopLoading(false);
@@ -57,7 +57,7 @@ export const StartScreen = () => {
     return () => {
       cancelled = true;
     };
-  }, [status, getTopScoreFn]);
+  }, [status, getLeaderboardFn]);
 
   if (status !== "idle") return null;
 
@@ -86,23 +86,28 @@ export const StartScreen = () => {
           You ARE the vacuum. Race the clock to leave a shiny clean trail behind you.
         </p>
 
-        {/* World record */}
+        {/* Top 10 Leaderboard */}
         <div className="mb-4 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3">
-          <div className="text-[10px] font-semibold uppercase tracking-widest text-amber-200/80">
-            🏆 World Record
+          <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-amber-200/80">
+            🏆 Top 10 Leaderboard
           </div>
           {topLoading ? (
-            <div className="mt-1 text-xs text-white/40">Loading…</div>
-          ) : top ? (
-            <div className="mt-1 flex items-center justify-center gap-2 text-white">
-              <span className="font-mono text-2xl font-bold tabular-nums text-amber-300">
-                {formatTime(top.scoreMs)}
-              </span>
-              <span className="text-sm text-white/70">by {top.name}</span>
-            </div>
+            <div className="text-xs text-white/40">Loading…</div>
+          ) : topList.length === 0 ? (
+            <div className="text-xs text-white/60">No scores yet — be the first!</div>
           ) : (
-            <div className="mt-1 text-xs text-white/60">
-              No scores yet — be the first!
+            <div className="space-y-1">
+              {topList.map((entry) => (
+                <div key={entry.rank} className="flex items-center gap-2 text-xs">
+                  <span className={`w-5 text-right font-bold tabular-nums ${entry.rank === 1 ? "text-amber-300" : "text-white/40"}`}>
+                    {entry.rank}.
+                  </span>
+                  <span className="font-mono tabular-nums text-white/90">
+                    {formatTime(entry.scoreMs)}
+                  </span>
+                  <span className="truncate text-white/60">{entry.name}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -167,7 +172,7 @@ export const StartScreen = () => {
         {/* Socials */}
         <div className="mt-6 border-t border-white/10 pt-4">
           <div className="mb-2 text-[10px] uppercase tracking-widest text-white/40">
-            Made by tekr
+            Made by tekrox
           </div>
           <div className="flex items-center justify-center gap-2">
             <a
