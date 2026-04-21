@@ -659,6 +659,88 @@ export const Apartment = () => {
         ))}
       </group>
 
+      {/* Tulips in glass vase on dining table */}
+      <group position={[5, 0.91, -0.5]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.09, 0.07, 0.28, 16]} />
+          <meshPhysicalMaterial
+            color="#cfe6f5"
+            transparent
+            opacity={0.4}
+            transmission={0.85}
+            roughness={0.05}
+            ior={1.45}
+          />
+        </mesh>
+        {[
+          { x: 0, z: 0, h: 0.42, c: "#c93030" },
+          { x: 0.05, z: -0.04, h: 0.46, c: "#e8a428" },
+          { x: -0.05, z: 0.03, h: 0.4, c: "#e85a8a" },
+          { x: 0.04, z: 0.05, h: 0.44, c: "#9a3ec9" },
+          { x: -0.04, z: -0.05, h: 0.38, c: "#e8d028" },
+        ].map((f, i) => (
+          <group key={`tulip-${i}`} position={[f.x, 0, f.z]}>
+            <mesh position={[0, f.h / 2, 0]}>
+              <cylinderGeometry args={[0.008, 0.008, f.h, 6]} />
+              <meshStandardMaterial color="#3e6b3e" />
+            </mesh>
+            <mesh position={[0, f.h + 0.04, 0]} castShadow>
+              <sphereGeometry args={[0.05, 8, 10]} />
+              <meshStandardMaterial color={f.c} roughness={0.7} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* Sunflower in tall ceramic pot, by bookshelf */}
+      <group position={[-7, 0, -1]}>
+        <mesh position={[0, 0.3, 0]} castShadow>
+          <cylinderGeometry args={[0.22, 0.18, 0.6, 16]} />
+          <meshStandardMaterial color="#e8e2d8" roughness={0.5} />
+        </mesh>
+        <mesh position={[0, 0.6, 0]}>
+          <cylinderGeometry args={[0.23, 0.22, 0.04, 16]} />
+          <meshStandardMaterial color="#d8d0c0" />
+        </mesh>
+        <mesh position={[0, 0.61, 0]}>
+          <cylinderGeometry args={[0.2, 0.2, 0.03, 16]} />
+          <meshStandardMaterial color="#3a2a18" roughness={1} />
+        </mesh>
+        <mesh position={[0, 1.2, 0]}>
+          <cylinderGeometry args={[0.025, 0.03, 1.2, 8]} />
+          <meshStandardMaterial color="#4a7a3a" roughness={0.8} />
+        </mesh>
+        {[0.9, 1.3, 1.6].map((ly, i) => (
+          <mesh
+            key={`sf-leaf-${i}`}
+            position={[i % 2 === 0 ? 0.15 : -0.15, ly, 0]}
+            rotation={[0, 0, i % 2 === 0 ? -0.6 : 0.6]}
+            castShadow
+          >
+            <boxGeometry args={[0.25, 0.12, 0.02]} />
+            <meshStandardMaterial color="#3a7a3a" roughness={0.85} />
+          </mesh>
+        ))}
+        <mesh position={[0, 1.85, 0]} castShadow>
+          <cylinderGeometry args={[0.13, 0.13, 0.04, 24]} />
+          <meshStandardMaterial color="#5a3a18" roughness={0.9} />
+        </mesh>
+        {Array.from({ length: 12 }).map((_, i) => {
+          const a = (i / 12) * Math.PI * 2;
+          return (
+            <mesh
+              key={`petal-${i}`}
+              position={[Math.cos(a) * 0.18, 1.85, Math.sin(a) * 0.18]}
+              rotation={[0, -a, 0]}
+              castShadow
+            >
+              <boxGeometry args={[0.16, 0.02, 0.07]} />
+              <meshStandardMaterial color="#f5c020" roughness={0.7} />
+            </mesh>
+          );
+        })}
+      </group>
+
       {/* Floor lamp by sofa corner */}
       <group position={[-7, 0, -5]}>
         <mesh position={[0, 0.05, 0]}>
