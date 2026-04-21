@@ -85,7 +85,7 @@ export const CompleteScreen = () => {
         const name = playerName.trim();
         let scoreId: number | null = null;
         if (name) {
-          const res = await submitScoreFn({ data: { name, scoreMs: finalMs } });
+          const res = await submitScoreFn({ data: { name, scoreMs: Math.round(finalMs) } });
           scoreId = res.id;
           setLastScoreId(scoreId);
         }
