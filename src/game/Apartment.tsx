@@ -2,16 +2,18 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import { useLoader } from "@react-three/fiber";
 import {
-  ROOM_HALF,
+  RAW_ROOM_HALF as ROOM_HALF,
   ROOM_HEIGHT,
-  WALL_THICKNESS,
-  DOOR_X_MIN,
-  DOOR_X_MAX,
+  RAW_WALL_THICKNESS as WALL_THICKNESS,
+  RAW_DOOR_X_MIN as DOOR_X_MIN,
+  RAW_DOOR_X_MAX as DOOR_X_MAX,
+  WORLD_SCALE,
 } from "./obstacles";
 import floorUrl from "@/assets/floor-wood.jpg";
 import wallUrl from "@/assets/wall-plaster.jpg";
 import windowViewUrl from "@/assets/window-view.jpg";
 import rugUrl from "@/assets/rug.jpg";
+import { TVScreen } from "./TVScreen";
 
 const sofaColor = "#6b7a8f";
 const sofaCushionColor = "#8694a8";
@@ -45,7 +47,7 @@ export const Apartment = () => {
   const doorHeight = 2.1;
 
   return (
-    <group>
+    <group scale={[WORLD_SCALE, 1, WORLD_SCALE]}>
       {/* Floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[ROOM_HALF * 2, ROOM_HALF * 2]} />
@@ -470,10 +472,7 @@ export const Apartment = () => {
           <boxGeometry args={[3.6, 2, 0.1]} />
           <meshStandardMaterial color="#0a0a0a" />
         </mesh>
-        <mesh position={[0, 1.7, 0.26]}>
-          <planeGeometry args={[3.4, 1.85]} />
-          <meshBasicMaterial color="#1a4a7c" toneMapped={false} />
-        </mesh>
+        <TVScreen position={[0, 1.7, 0.26]} width={3.4} height={1.85} />
         <mesh position={[2.4, 0.95, 0]} castShadow>
           <cylinderGeometry args={[0.13, 0.18, 0.35, 16]} />
           <meshStandardMaterial color="#d4a574" />
@@ -607,21 +606,21 @@ interface WindowProps {
 const Window = ({ position, rotation, width, height, tex }: WindowProps) => {
   const halfW = width / 2;
   const halfH = height / 2;
-  // Aspect-correct city scene: scale a much LARGER backdrop and push it
-  // far outside the wall so it parallaxes like a real distant view.
-  const sceneScale = 3.0;
+  // Magnify backdrop and pull it CLOSE to the glass so it reads as a tight,
+  // detailed view (less empty perspective).
+  const sceneScale = 1.6;
   const sceneW = width * sceneScale;
   const sceneH = height * sceneScale;
   return (
     <group position={position} rotation={rotation}>
-      {/* Distant city backdrop — pushed far behind glass, oversized for parallax */}
-      <mesh position={[0, 0, -6]}>
+      {/* Magnified city backdrop, tucked just behind the glass */}
+      <mesh position={[0, 0, -0.25]}>
         <planeGeometry args={[sceneW, sceneH]} />
         <meshBasicMaterial map={tex} toneMapped={false} />
       </mesh>
-      {/* Soft sky-blue tint behind everything in case backdrop edges show */}
-      <mesh position={[0, 0, -6.2]}>
-        <planeGeometry args={[sceneW * 1.5, sceneH * 1.5]} />
+      {/* Sky-blue safety tint behind, in case backdrop edges peek */}
+      <mesh position={[0, 0, -0.45]}>
+        <planeGeometry args={[sceneW * 1.4, sceneH * 1.4]} />
         <meshBasicMaterial color="#b8d8ee" toneMapped={false} />
       </mesh>
       {/* Glass pane — slight blue tint, transparent, subtle reflection feel */}

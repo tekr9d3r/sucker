@@ -38,7 +38,7 @@ export const Roomba = ({ playerRef, onShake }: Props) => {
   useEffect(() => {
     if (status === "idle") {
       playerRef.current.x = 0;
-      playerRef.current.z = 5;
+      playerRef.current.z = 3;
       angleRef.current = Math.PI;
       velRef.current = 0;
       startTimeRef.current = null;
