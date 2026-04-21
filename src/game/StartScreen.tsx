@@ -14,10 +14,16 @@ export const StartScreen = () => {
   const status = useGameStore((s) => s.status);
   const start = useGameStore((s) => s.start);
   const bestMs = useGameStore((s) => s.bestMs);
+  const playerName = useGameStore((s) => s.playerName);
+  const setPlayerName = useGameStore((s) => s.setPlayerName);
 
   if (status !== "idle") return null;
 
+  const trimmed = playerName.trim();
+  const canStart = trimmed.length >= 1 && trimmed.length <= 20;
+
   const handleStart = async () => {
+    if (!canStart) return;
     await resumeAudio();
     startSuction();
     start();
@@ -31,6 +37,25 @@ export const StartScreen = () => {
         <p className="mb-6 text-sm text-white/70">
           You ARE the vacuum. Race the clock to leave a shiny clean trail behind you.
         </p>
+
+        <div className="mb-4 text-left">
+          <label htmlFor="player-name" className="mb-1 block text-xs uppercase tracking-widest text-white/60">
+            Your name
+          </label>
+          <input
+            id="player-name"
+            type="text"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && canStart) handleStart();
+            }}
+            placeholder="Nickname"
+            maxLength={20}
+            autoComplete="off"
+            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-emerald-400/60 focus:outline-none"
+          />
+        </div>
 
         <div className="mb-6 rounded-lg bg-white/5 p-4 text-left text-sm text-white/80">
           <div className="mb-2 font-semibold text-white">Controls</div>
@@ -61,9 +86,10 @@ export const StartScreen = () => {
 
         <button
           onClick={handleStart}
-          className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-base font-semibold text-white shadow-lg transition-transform hover:scale-105 active:scale-100"
+          disabled={!canStart}
+          className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-base font-semibold text-white shadow-lg transition-transform hover:scale-105 active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
         >
-          Start Cleaning
+          {canStart ? "Start Cleaning" : "Enter your name"}
         </button>
       </div>
     </div>
