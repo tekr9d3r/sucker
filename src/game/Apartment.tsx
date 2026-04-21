@@ -1,6 +1,6 @@
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo } from "react";
 import * as THREE from "three";
-import { useLoader, useFrame } from "@react-three/fiber";
+import { useLoader } from "@react-three/fiber";
 import {
   RAW_ROOM_HALF as ROOM_HALF,
   ROOM_HEIGHT,
