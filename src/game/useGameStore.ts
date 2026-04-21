@@ -12,6 +12,11 @@ interface GameState {
   // Damage 0..100
   damage: number;
   damageMs: number; // accumulated time penalty in ms
+  // Player identity & last submitted score id (for "your rank" lookup)
+  playerName: string;
+  lastScoreId: number | null;
+  setPlayerName: (name: string) => void;
+  setLastScoreId: (id: number | null) => void;
   // Mini-map state
   playerX: number;
   playerZ: number;
@@ -33,11 +38,17 @@ interface GameState {
 }
 
 const BEST_KEY = "roomba.bestMs";
+const NAME_KEY = "roomba.playerName";
 
 const loadBest = (): number | null => {
   if (typeof window === "undefined") return null;
   const v = window.localStorage.getItem(BEST_KEY);
   return v ? Number(v) : null;
+};
+
+const loadName = (): string => {
+  if (typeof window === "undefined") return "";
+  return window.localStorage.getItem(NAME_KEY) ?? "";
 };
 
 // 100 damage = 60 sec penalty → 600ms per damage point.
@@ -58,8 +69,15 @@ export const useGameStore = create<GameState>((set, get) => ({
   catX: 0,
   catZ: 0,
   cellsVersion: 0,
+  playerName: loadName(),
+  lastScoreId: null,
+  setPlayerName: (name) => {
+    if (typeof window !== "undefined") window.localStorage.setItem(NAME_KEY, name);
+    set({ playerName: name });
+  },
+  setLastScoreId: (id) => set({ lastScoreId: id }),
   start: () =>
-    set({ status: "playing", elapsedMs: 0, progress: 0, cleanedCells: 0, damage: 0, damageMs: 0 }),
+    set({ status: "playing", elapsedMs: 0, progress: 0, cleanedCells: 0, damage: 0, damageMs: 0, lastScoreId: null }),
   finish: () => {
     const { elapsedMs, damageMs, bestMs } = get();
     const finalMs = elapsedMs + damageMs;
