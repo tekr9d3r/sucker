@@ -232,37 +232,79 @@ export const Apartment = () => {
         </mesh>
       </group>
 
-      {/* Sofa */}
+      {/* Sofa — richly detailed with tufting, piping and seat cushions */}
       <group position={[-4.5, 0, -6.85]}>
+        {/* Base frame */}
         <mesh position={[0, 0.35, 0]} castShadow>
           <boxGeometry args={[5, 0.7, 1.3]} />
-          <meshStandardMaterial color={sofaColor} roughness={0.9} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
         </mesh>
+        {/* Front piping along base */}
+        <mesh position={[0, 0.7, 0.66]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.025, 0.025, 4.6, 8]} />
+          <meshStandardMaterial color="#4d5867" roughness={0.8} />
+        </mesh>
+        {/* Backrest */}
         <mesh position={[0, 1.0, -0.5]} castShadow>
           <boxGeometry args={[5, 1.3, 0.3]} />
-          <meshStandardMaterial color={sofaColor} roughness={0.9} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
         </mesh>
+        {/* Tufting buttons on backrest (3x4 grid) */}
+        {[-2, -0.65, 0.65, 2].map((bx) =>
+          [0.7, 1.25].map((by) => (
+            <mesh key={`tuft-${bx}-${by}`} position={[bx, by, -0.36]} castShadow>
+              <sphereGeometry args={[0.04, 8, 8]} />
+              <meshStandardMaterial color="#4d5867" roughness={0.6} />
+            </mesh>
+          )),
+        )}
+        {/* Armrests with rolled top */}
         <mesh position={[-2.5, 0.6, 0]} castShadow>
           <boxGeometry args={[0.4, 1.2, 1.3]} />
-          <meshStandardMaterial color={sofaColor} roughness={0.9} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
+        </mesh>
+        <mesh position={[-2.5, 1.22, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.18, 0.18, 1.3, 16]} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
         </mesh>
         <mesh position={[2.5, 0.6, 0]} castShadow>
           <boxGeometry args={[0.4, 1.2, 1.3]} />
-          <meshStandardMaterial color={sofaColor} roughness={0.9} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
         </mesh>
+        <mesh position={[2.5, 1.22, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.18, 0.18, 1.3, 16]} />
+          <meshStandardMaterial color={sofaColor} roughness={0.95} />
+        </mesh>
+        {/* Seat cushions — slightly varied tones for fabric realism */}
         {[-1.5, 0, 1.5].map((cx, i) => (
-          <mesh key={i} position={[cx, 0.85, 0.05]} castShadow>
-            <boxGeometry args={[1.4, 0.3, 1]} />
-            <meshStandardMaterial color={sofaCushionColor} roughness={0.95} />
-          </mesh>
+          <group key={`seat-${i}`} position={[cx, 0.85, 0.05]}>
+            <mesh castShadow>
+              <boxGeometry args={[1.4, 0.32, 1]} />
+              <meshStandardMaterial
+                color={i === 1 ? "#7d8ba0" : sofaCushionColor}
+                roughness={0.98}
+              />
+            </mesh>
+            {/* Seam piping around top edge */}
+            <mesh position={[0, 0.16, 0.5]} rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.018, 0.018, 1.4, 8]} />
+              <meshStandardMaterial color="#4d5867" />
+            </mesh>
+          </group>
         ))}
+        {/* Throw pillows */}
         <mesh position={[-1.7, 1.0, 0.15]} rotation={[0, 0, 0.2]} castShadow>
           <boxGeometry args={[0.55, 0.4, 0.25]} />
-          <meshStandardMaterial color="#c9794a" />
+          <meshStandardMaterial color="#c9794a" roughness={1} />
         </mesh>
         <mesh position={[1.8, 1.0, 0.15]} rotation={[0, 0, -0.15]} castShadow>
           <boxGeometry args={[0.55, 0.4, 0.25]} />
-          <meshStandardMaterial color="#3e6b3e" />
+          <meshStandardMaterial color="#3e6b3e" roughness={1} />
+        </mesh>
+        {/* A small striped patterned pillow in middle */}
+        <mesh position={[0.1, 1.05, 0.18]} rotation={[0, 0, 0.05]} castShadow>
+          <boxGeometry args={[0.5, 0.35, 0.22]} />
+          <meshStandardMaterial color="#e8d8b8" roughness={1} />
         </mesh>
         {/* Knitted throw blanket draped over right armrest */}
         <mesh position={[2.1, 0.78, 0.3]} rotation={[0.2, 0.1, 0]} castShadow>
@@ -272,6 +314,11 @@ export const Apartment = () => {
         <mesh position={[2.45, 0.55, 0.55]} rotation={[0, 0, 0.3]} castShadow>
           <boxGeometry args={[0.5, 0.5, 0.05]} />
           <meshStandardMaterial color="#b85c4a" roughness={1} />
+        </mesh>
+        {/* Folded second blanket on left armrest */}
+        <mesh position={[-2.5, 1.45, 0]} castShadow>
+          <boxGeometry args={[0.55, 0.12, 0.85]} />
+          <meshStandardMaterial color="#5a6e7d" roughness={1} />
         </mesh>
         {/* Wooden sofa legs */}
         {[-2.4, -0.8, 0.8, 2.4].map((lx, i) => (
@@ -416,10 +463,10 @@ export const Apartment = () => {
         </mesh>
       </group>
 
-      {/* Chairs */}
+      {/* Chairs — backrest faces AWAY from table so a person sits facing the table */}
       {[
-        { z: -2.25, faceZ: 1 },
-        { z: 2.45, faceZ: -1 },
+        { z: -2.25, faceZ: -1 }, // chair north of table → backrest on -z (away from table at z=0.25)
+        { z: 2.45, faceZ: 1 },   // chair south of table → backrest on +z
       ].map((c, i) => (
         <group key={`chair-${i}`} position={[5, 0, c.z]}>
           <mesh position={[0, 0.45, 0]} castShadow>
@@ -479,32 +526,102 @@ export const Apartment = () => {
         </mesh>
       </group>
 
-      {/* Bookshelf on left wall */}
+      {/* Bookshelf on left wall — richly detailed */}
       <group position={[-7.2, 0, 2]}>
+        {/* Carcass back panel */}
         <mesh position={[0, 1.1, 0]} castShadow>
           <boxGeometry args={[0.4, 2.2, 4]} />
           <meshStandardMaterial color={tableColor} />
         </mesh>
+        {/* Outer frame trim — top, bottom, sides */}
+        <mesh position={[0.18, 2.2, 0]}>
+          <boxGeometry args={[0.06, 0.08, 4.05]} />
+          <meshStandardMaterial color="#3a2515" />
+        </mesh>
+        <mesh position={[0.18, 0, 0]}>
+          <boxGeometry args={[0.06, 0.06, 4.05]} />
+          <meshStandardMaterial color="#3a2515" />
+        </mesh>
+        {/* Vertical dividers — split shelves into compartments */}
+        {[-1.2, 0.4].map((dz, i) => (
+          <mesh key={`vdiv-${i}`} position={[0.1, 1.1, dz]}>
+            <boxGeometry args={[0.32, 2.0, 0.04]} />
+            <meshStandardMaterial color="#3a2515" />
+          </mesh>
+        ))}
+        {/* Horizontal shelves */}
         {[0.4, 0.95, 1.5, 2.0].map((sy, i) => (
-          <mesh key={i} position={[0.05, sy, 0]}>
+          <mesh key={`shelf-${i}`} position={[0.05, sy, 0]}>
             <boxGeometry args={[0.35, 0.04, 3.9]} />
             <meshStandardMaterial color="#3a2515" />
           </mesh>
         ))}
+        {/* Books — varied heights, some leaning */}
         {[0.65, 1.2, 1.75].map((shelfY, si) =>
           Array.from({ length: 10 }).map((_, bi) => {
             const z = -1.8 + bi * 0.4;
             const h = 0.35 + ((si * 7 + bi) % 4) * 0.04;
             const w = 0.22 + ((si * 3 + bi) % 5) * 0.03;
             const c = bookColors[(si * 5 + bi) % bookColors.length];
+            const lean = ((si + bi) % 7 === 0) ? 0.15 : 0;
             return (
-              <mesh key={`b-${si}-${bi}`} position={[0.1, shelfY, z]}>
+              <mesh
+                key={`b-${si}-${bi}`}
+                position={[0.1, shelfY + h / 2 - 0.18, z]}
+                rotation={[0, 0, lean]}
+              >
                 <boxGeometry args={[w, h, 0.3]} />
-                <meshStandardMaterial color={c} roughness={0.8} />
+                <meshStandardMaterial color={c} roughness={0.85} />
               </mesh>
             );
           }),
         )}
+        {/* Stack of horizontally-laid books on shelf 1 */}
+        <group position={[0.1, 0.7, -0.6]}>
+          {[0, 1, 2].map((i) => (
+            <mesh key={`hb-${i}`} position={[0, i * 0.06, 0]}>
+              <boxGeometry args={[0.3, 0.05, 0.4]} />
+              <meshStandardMaterial color={bookColors[i + 1]} roughness={0.8} />
+            </mesh>
+          ))}
+        </group>
+        {/* Decorative vase on top of shelf */}
+        <mesh position={[0.1, 2.36, -1.5]} castShadow>
+          <cylinderGeometry args={[0.08, 0.06, 0.25, 12]} />
+          <meshStandardMaterial color="#d8c8b0" roughness={0.6} />
+        </mesh>
+        {/* Globe / sphere ornament */}
+        <mesh position={[0.1, 2.32, 0.5]} castShadow>
+          <sphereGeometry args={[0.13, 16, 16]} />
+          <meshStandardMaterial color="#3e6b8b" roughness={0.4} metalness={0.3} />
+        </mesh>
+        {/* Small framed photo on top */}
+        <group position={[0.1, 2.32, 1.2]}>
+          <mesh>
+            <boxGeometry args={[0.04, 0.22, 0.18]} />
+            <meshStandardMaterial color="#2a1a10" />
+          </mesh>
+          <mesh position={[0.025, 0, 0]}>
+            <boxGeometry args={[0.005, 0.18, 0.14]} />
+            <meshStandardMaterial color="#c9a26a" />
+          </mesh>
+        </group>
+        {/* Small potted succulent on middle shelf */}
+        <group position={[0.1, 1.55, 1.5]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.07, 0.05, 0.12, 12]} />
+            <meshStandardMaterial color="#a85a30" />
+          </mesh>
+          <mesh position={[0, 0.1, 0]} castShadow>
+            <sphereGeometry args={[0.09, 10, 10]} />
+            <meshStandardMaterial color="#5a8a4a" />
+          </mesh>
+        </group>
+        {/* Bookend on right side of top shelf */}
+        <mesh position={[0.1, 2.18, 1.85]} castShadow>
+          <boxGeometry args={[0.18, 0.18, 0.04]} />
+          <meshStandardMaterial color="#1a1a1a" metalness={0.6} roughness={0.4} />
+        </mesh>
       </group>
 
       {/* Potted fiddle-leaf fig in corner */}
@@ -540,6 +657,88 @@ export const Apartment = () => {
             <meshStandardMaterial color={i % 2 === 0 ? plantLeafColor : "#4d8a4d"} roughness={0.7} />
           </mesh>
         ))}
+      </group>
+
+      {/* Tulips in glass vase on dining table */}
+      <group position={[5, 0.91, -0.5]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.09, 0.07, 0.28, 16]} />
+          <meshPhysicalMaterial
+            color="#cfe6f5"
+            transparent
+            opacity={0.4}
+            transmission={0.85}
+            roughness={0.05}
+            ior={1.45}
+          />
+        </mesh>
+        {[
+          { x: 0, z: 0, h: 0.42, c: "#c93030" },
+          { x: 0.05, z: -0.04, h: 0.46, c: "#e8a428" },
+          { x: -0.05, z: 0.03, h: 0.4, c: "#e85a8a" },
+          { x: 0.04, z: 0.05, h: 0.44, c: "#9a3ec9" },
+          { x: -0.04, z: -0.05, h: 0.38, c: "#e8d028" },
+        ].map((f, i) => (
+          <group key={`tulip-${i}`} position={[f.x, 0, f.z]}>
+            <mesh position={[0, f.h / 2, 0]}>
+              <cylinderGeometry args={[0.008, 0.008, f.h, 6]} />
+              <meshStandardMaterial color="#3e6b3e" />
+            </mesh>
+            <mesh position={[0, f.h + 0.04, 0]} castShadow>
+              <sphereGeometry args={[0.05, 8, 10]} />
+              <meshStandardMaterial color={f.c} roughness={0.7} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* Sunflower in tall ceramic pot, by bookshelf */}
+      <group position={[-7, 0, -1]}>
+        <mesh position={[0, 0.3, 0]} castShadow>
+          <cylinderGeometry args={[0.22, 0.18, 0.6, 16]} />
+          <meshStandardMaterial color="#e8e2d8" roughness={0.5} />
+        </mesh>
+        <mesh position={[0, 0.6, 0]}>
+          <cylinderGeometry args={[0.23, 0.22, 0.04, 16]} />
+          <meshStandardMaterial color="#d8d0c0" />
+        </mesh>
+        <mesh position={[0, 0.61, 0]}>
+          <cylinderGeometry args={[0.2, 0.2, 0.03, 16]} />
+          <meshStandardMaterial color="#3a2a18" roughness={1} />
+        </mesh>
+        <mesh position={[0, 1.2, 0]}>
+          <cylinderGeometry args={[0.025, 0.03, 1.2, 8]} />
+          <meshStandardMaterial color="#4a7a3a" roughness={0.8} />
+        </mesh>
+        {[0.9, 1.3, 1.6].map((ly, i) => (
+          <mesh
+            key={`sf-leaf-${i}`}
+            position={[i % 2 === 0 ? 0.15 : -0.15, ly, 0]}
+            rotation={[0, 0, i % 2 === 0 ? -0.6 : 0.6]}
+            castShadow
+          >
+            <boxGeometry args={[0.25, 0.12, 0.02]} />
+            <meshStandardMaterial color="#3a7a3a" roughness={0.85} />
+          </mesh>
+        ))}
+        <mesh position={[0, 1.85, 0]} castShadow>
+          <cylinderGeometry args={[0.13, 0.13, 0.04, 24]} />
+          <meshStandardMaterial color="#5a3a18" roughness={0.9} />
+        </mesh>
+        {Array.from({ length: 12 }).map((_, i) => {
+          const a = (i / 12) * Math.PI * 2;
+          return (
+            <mesh
+              key={`petal-${i}`}
+              position={[Math.cos(a) * 0.18, 1.85, Math.sin(a) * 0.18]}
+              rotation={[0, -a, 0]}
+              castShadow
+            >
+              <boxGeometry args={[0.16, 0.02, 0.07]} />
+              <meshStandardMaterial color="#f5c020" roughness={0.7} />
+            </mesh>
+          );
+        })}
       </group>
 
       {/* Floor lamp by sofa corner */}

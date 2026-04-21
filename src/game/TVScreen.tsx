@@ -165,9 +165,9 @@ export const TVScreen = ({ position, width, height }: Props) => {
   });
 
   return (
-    <mesh position={position}>
+    <mesh position={position} rotation={[0, Math.PI, 0]} frustumCulled={false} renderOrder={2}>
       <planeGeometry args={[width, height]} />
-      <meshBasicMaterial ref={matRef} map={texture} toneMapped={false} />
+      <meshBasicMaterial ref={matRef} map={texture} toneMapped={false} side={THREE.DoubleSide} />
     </mesh>
   );
 };
