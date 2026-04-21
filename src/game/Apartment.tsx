@@ -240,8 +240,8 @@ export const Apartment = () => {
           <meshStandardMaterial color={sofaColor} roughness={0.95} />
         </mesh>
         {/* Front piping along base */}
-        <mesh position={[0, 0.7, 0.66]}>
-          <cylinderGeometry args={[0.025, 0.025, 4.6, 8]} rotation={[0, 0, Math.PI / 2]} />
+        <mesh position={[0, 0.7, 0.66]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.025, 0.025, 4.6, 8]} />
           <meshStandardMaterial color="#4d5867" roughness={0.8} />
         </mesh>
         {/* Backrest */}
@@ -286,8 +286,8 @@ export const Apartment = () => {
               />
             </mesh>
             {/* Seam piping around top edge */}
-            <mesh position={[0, 0.16, 0.5]}>
-              <cylinderGeometry args={[0.018, 0.018, 1.4, 8]} rotation={[0, 0, Math.PI / 2]} />
+            <mesh position={[0, 0.16, 0.5]} rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.018, 0.018, 1.4, 8]} />
               <meshStandardMaterial color="#4d5867" />
             </mesh>
           </group>
