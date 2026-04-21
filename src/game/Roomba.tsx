@@ -100,13 +100,13 @@ export const Roomba = ({ playerRef, onShake }: Props) => {
     bobRef.current += dt * 14 * speedFrac;
     const bob = Math.sin(bobRef.current) * 0.015 * speedFrac;
 
-    // Camera position & orientation
+    // Camera position & orientation — build quaternion directly to avoid
+    // gimbal flip from lookAt + manual rotation.z mutation.
     camera.position.set(x, CAM_HEIGHT + bob, z);
     const yaw = angleRef.current;
-    const dir = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
-    const target = new THREE.Vector3(x + dir.x, CAM_HEIGHT + bob, z + dir.z);
-    camera.lookAt(target);
-    camera.rotation.z = tiltRef.current;
+    camera.rotation.order = "YXZ";
+    camera.rotation.set(0, yaw, tiltRef.current);
+    camera.up.set(0, 1, 0);
 
     setPlayer(x, z, yaw);
 
