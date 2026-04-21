@@ -25,6 +25,21 @@ export const StartScreen = () => {
   const [top, setTop] = useState<TopScore>(null);
   const [topLoading, setTopLoading] = useState(true);
 
+  // Auto-start when arriving from a portal (?portal=true)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("portal")) return;
+    const username = params.get("username");
+    if (username) setPlayerName(username.slice(0, 20));
+    const t = setTimeout(async () => {
+      await resumeAudio();
+      startSuction();
+      start();
+    }, 150);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (status !== "idle") return;
     let cancelled = false;

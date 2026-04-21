@@ -4,6 +4,7 @@ import { Apartment } from "./Apartment";
 import { Vacuum } from "./Vacuum";
 import { DirtField } from "./DirtField";
 import { Cat } from "./Cat";
+import { Portal } from "./Portal";
 import { HUD } from "./HUD";
 import { StartScreen } from "./StartScreen";
 import { CompleteScreen } from "./CompleteScreen";
@@ -56,6 +57,7 @@ export const Game = () => {
         <DirtField playerRef={playerRef} active={status === "playing"} />
         <Cat playerRef={playerRef} />
         <Vacuum playerRef={playerRef} onShake={handleShake} />
+        <Portal playerRef={playerRef} />
       </Canvas>
 
       <div
