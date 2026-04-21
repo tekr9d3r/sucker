@@ -16,8 +16,11 @@ export const getSql = () => {
 
 const ensureSchema = async (): Promise<void> => {
   const sql = getSql();
+  // Migrate from legacy table name if present (one-time, idempotent)
+  await sql`ALTER TABLE IF EXISTS roomba_scores RENAME TO vacuum_scores`;
+  await sql`ALTER INDEX IF EXISTS roomba_scores_score_idx RENAME TO vacuum_scores_score_idx`;
   await sql`
-    CREATE TABLE IF NOT EXISTS roomba_scores (
+    CREATE TABLE IF NOT EXISTS vacuum_scores (
       id          BIGSERIAL PRIMARY KEY,
       name        TEXT NOT NULL,
       score_ms    INTEGER NOT NULL CHECK (score_ms >= 0 AND score_ms <= 86400000),
@@ -25,8 +28,8 @@ const ensureSchema = async (): Promise<void> => {
     )
   `;
   await sql`
-    CREATE INDEX IF NOT EXISTS roomba_scores_score_idx
-      ON roomba_scores (score_ms ASC)
+    CREATE INDEX IF NOT EXISTS vacuum_scores_score_idx
+      ON vacuum_scores (score_ms ASC)
   `;
 };
 

@@ -34,7 +34,7 @@ export const submitScore = createServerFn({ method: "POST" })
     await ensureSchemaOnce();
     const sql = getSql();
     const rows = (await sql`
-      INSERT INTO roomba_scores (name, score_ms)
+      INSERT INTO vacuum_scores (name, score_ms)
       VALUES (${data.name}, ${data.scoreMs})
       RETURNING id
     `) as Array<{ id: number | string }>;
@@ -53,7 +53,7 @@ export const getLeaderboard = createServerFn({ method: "POST" })
 
     const topRows = (await sql`
       SELECT id, name, score_ms, created_at
-      FROM roomba_scores
+      FROM vacuum_scores
       ORDER BY score_ms ASC, created_at ASC
       LIMIT ${TOP_N}
     `) as Array<{ id: number | string; name: string; score_ms: number; created_at: string }>;
@@ -71,7 +71,7 @@ export const getLeaderboard = createServerFn({ method: "POST" })
       if (!inTop) {
         const meRows = (await sql`
           SELECT id, name, score_ms, created_at
-          FROM roomba_scores
+          FROM vacuum_scores
           WHERE id = ${data.aroundId}
           LIMIT 1
         `) as Array<{ id: number | string; name: string; score_ms: number; created_at: string }>;
@@ -79,7 +79,7 @@ export const getLeaderboard = createServerFn({ method: "POST" })
         if (me) {
           const rankRows = (await sql`
             SELECT COUNT(*)::int AS better
-            FROM roomba_scores
+            FROM vacuum_scores
             WHERE score_ms < ${me.score_ms}
                OR (score_ms = ${me.score_ms} AND created_at < ${me.created_at})
           `) as Array<{ better: number }>;
