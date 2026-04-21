@@ -13,6 +13,7 @@ import floorUrl from "@/assets/floor-wood.jpg";
 import wallUrl from "@/assets/wall-plaster.jpg";
 import windowViewUrl from "@/assets/window-view.jpg";
 import rugUrl from "@/assets/rug.jpg";
+import { TVScreen } from "./TVScreen";
 
 const sofaColor = "#6b7a8f";
 const sofaCushionColor = "#8694a8";
@@ -471,10 +472,7 @@ export const Apartment = () => {
           <boxGeometry args={[3.6, 2, 0.1]} />
           <meshStandardMaterial color="#0a0a0a" />
         </mesh>
-        <mesh position={[0, 1.7, 0.26]}>
-          <planeGeometry args={[3.4, 1.85]} />
-          <meshBasicMaterial color="#1a4a7c" toneMapped={false} />
-        </mesh>
+        <TVScreen position={[0, 1.7, 0.26]} width={3.4} height={1.85} />
         <mesh position={[2.4, 0.95, 0]} castShadow>
           <cylinderGeometry args={[0.13, 0.18, 0.35, 16]} />
           <meshStandardMaterial color="#d4a574" />
