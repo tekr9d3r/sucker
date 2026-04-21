@@ -560,13 +560,13 @@ export const Apartment = () => {
         <pointLight position={[0, 1.7, 0]} intensity={0.35} color="#ffd88a" distance={5} />
       </group>
 
-      {/* Wall clock on south wall (next to door area) */}
+      {/* Wall clock on south wall */}
       <group position={[-3, 2.3, ROOM_HALF - 0.06]} rotation={[0, Math.PI, 0]}>
-        <mesh>
-          <cylinderGeometry args={[0.3, 0.3, 0.04, 24]} rotation={[Math.PI / 2, 0, 0]} />
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.3, 0.3, 0.04, 24]} />
           <meshStandardMaterial color="#2a2018" />
         </mesh>
-        <mesh position={[0, 0, 0.025]}>
+        <mesh position={[0, 0, 0.025]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.27, 0.27, 0.005, 24]} />
           <meshStandardMaterial color="#fafafa" />
         </mesh>
