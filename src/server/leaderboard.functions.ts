@@ -28,6 +28,24 @@ export type LeaderboardResult = {
 
 const TOP_N = 10;
 
+export type TopScore = { name: string; scoreMs: number } | null;
+
+export const getTopScore = createServerFn({ method: "GET" }).handler(
+  async (): Promise<TopScore> => {
+    await ensureSchemaOnce();
+    const sql = getSql();
+    const rows = (await sql`
+      SELECT name, score_ms
+      FROM vacuum_scores
+      ORDER BY score_ms ASC, created_at ASC
+      LIMIT 1
+    `) as Array<{ name: string; score_ms: number }>;
+    if (rows.length === 0) return null;
+    return { name: rows[0].name, scoreMs: Number(rows[0].score_ms) };
+  },
+);
+
+
 export const submitScore = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => submitSchema.parse(input))
   .handler(async ({ data }) => {
