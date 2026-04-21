@@ -94,18 +94,9 @@ export const startSuction = () => {
 export const setSuctionIntensity = (v: number) => {
   if (!suctionMaster || !ctx) return;
   const clamped = Math.max(0, Math.min(1, v));
-
-  // Volume ramp
-  suctionMaster.gain.linearRampToValueAtTime(clamped * 0.65, ctx.currentTime + 0.08);
-
-  // Pitch rise with speed: up to ~10% higher at max intensity
-  // Simulates motor RPM increasing as the vacuum works harder.
-  const pitchScale = 1 + clamped * 0.1;
-  motorOscs.forEach((osc, i) => {
-    const isWhine = i >= 4;
-    const base = isWhine ? 2600 : MOTOR_BASE_HZ * (i + 1);
-    osc.frequency.linearRampToValueAtTime(base * pitchScale, ctx!.currentTime + 0.12);
-  });
+  // v=0 → silence (not playing). v=0.2 (idle/still) → 0.5. v=1.0 → 0.6.
+  const target = clamped === 0 ? 0 : Math.max(0, 0.5 + (clamped - 0.2) * 0.125);
+  suctionMaster.gain.linearRampToValueAtTime(target, ctx.currentTime + 0.08);
 };
 
 export const stopSuction = () => {
