@@ -1,12 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import * as THREE from "three";
-import { useLoader } from "@react-three/fiber";
+import { useLoader, useFrame } from "@react-three/fiber";
 import {
-  ROOM_HALF,
+  RAW_ROOM_HALF as ROOM_HALF,
   ROOM_HEIGHT,
-  WALL_THICKNESS,
-  DOOR_X_MIN,
-  DOOR_X_MAX,
+  RAW_WALL_THICKNESS as WALL_THICKNESS,
+  RAW_DOOR_X_MIN as DOOR_X_MIN,
+  RAW_DOOR_X_MAX as DOOR_X_MAX,
+  WORLD_SCALE,
 } from "./obstacles";
 import floorUrl from "@/assets/floor-wood.jpg";
 import wallUrl from "@/assets/wall-plaster.jpg";
