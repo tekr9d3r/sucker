@@ -12,7 +12,7 @@ import { useGameStore } from "./useGameStore";
 import { stopSuction } from "./audio";
 
 export const Game = () => {
-  const playerRef = useRef({ x: 0, z: 5 });
+  const playerRef = useRef({ x: 0, z: 5, yaw: Math.PI });
   const status = useGameStore((s) => s.status);
   const [shake, setShake] = useState(0);
   const [vignette, setVignette] = useState(0);
