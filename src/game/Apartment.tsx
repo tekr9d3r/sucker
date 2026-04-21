@@ -262,6 +262,22 @@ export const Apartment = () => {
           <boxGeometry args={[0.55, 0.4, 0.25]} />
           <meshStandardMaterial color="#3e6b3e" />
         </mesh>
+        {/* Knitted throw blanket draped over right armrest */}
+        <mesh position={[2.1, 0.78, 0.3]} rotation={[0.2, 0.1, 0]} castShadow>
+          <boxGeometry args={[1.2, 0.05, 0.9]} />
+          <meshStandardMaterial color="#b85c4a" roughness={1} />
+        </mesh>
+        <mesh position={[2.45, 0.55, 0.55]} rotation={[0, 0, 0.3]} castShadow>
+          <boxGeometry args={[0.5, 0.5, 0.05]} />
+          <meshStandardMaterial color="#b85c4a" roughness={1} />
+        </mesh>
+        {/* Wooden sofa legs */}
+        {[-2.4, -0.8, 0.8, 2.4].map((lx, i) => (
+          <mesh key={`sleg-${i}`} position={[lx, 0.05, 0.5]}>
+            <boxGeometry args={[0.1, 0.1, 0.1]} />
+            <meshStandardMaterial color="#3a2515" />
+          </mesh>
+        ))}
       </group>
 
       {/* Side table next to sofa with lamp */}
