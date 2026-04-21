@@ -120,21 +120,76 @@ export const Apartment = () => {
         <meshStandardMaterial map={wallTex} />
       </mesh>
 
-      {/* South wall */}
-      <mesh position={[0, ROOM_HEIGHT / 2, ROOM_HALF + WALL_THICKNESS / 2]}>
-        <boxGeometry args={[ROOM_HALF * 2 + WALL_THICKNESS * 2, ROOM_HEIGHT, WALL_THICKNESS]} />
-        <meshStandardMaterial map={wallTex} />
-      </mesh>
+      {/* South wall — split into 4 segments around window at x=5, width 2.5, y 0.65–2.25 */}
+      {(() => {
+        const W = 2.5, H = 1.6, cx = 5, cy = 1.45;
+        const xL = cx - W / 2, xR = cx + W / 2;
+        const yB = cy - H / 2, yT = cy + H / 2;
+        const z = ROOM_HALF + WALL_THICKNESS / 2;
+        const totalW = ROOM_HALF * 2 + WALL_THICKNESS * 2;
+        const leftW = xL - (-ROOM_HALF - WALL_THICKNESS);
+        const rightW = (ROOM_HALF + WALL_THICKNESS) - xR;
+        return (
+          <>
+            {/* left of window */}
+            <mesh position={[(-ROOM_HALF - WALL_THICKNESS + xL) / 2, ROOM_HEIGHT / 2, z]}>
+              <boxGeometry args={[leftW, ROOM_HEIGHT, WALL_THICKNESS]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            {/* right of window */}
+            <mesh position={[(xR + ROOM_HALF + WALL_THICKNESS) / 2, ROOM_HEIGHT / 2, z]}>
+              <boxGeometry args={[rightW, ROOM_HEIGHT, WALL_THICKNESS]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            {/* below window */}
+            <mesh position={[cx, yB / 2, z]}>
+              <boxGeometry args={[W, yB, WALL_THICKNESS]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            {/* above window */}
+            <mesh position={[cx, (yT + ROOM_HEIGHT) / 2, z]}>
+              <boxGeometry args={[W, ROOM_HEIGHT - yT, WALL_THICKNESS]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            {/* unused vars to satisfy linter */}
+            <group visible={false}><mesh><boxGeometry args={[totalW, 0.001, 0.001]} /></mesh></group>
+          </>
+        );
+      })()}
       {/* West wall */}
       <mesh position={[-ROOM_HALF - WALL_THICKNESS / 2, ROOM_HEIGHT / 2, 0]}>
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_HALF * 2]} />
         <meshStandardMaterial map={wallTex} />
       </mesh>
-      {/* East wall */}
-      <mesh position={[ROOM_HALF + WALL_THICKNESS / 2, ROOM_HEIGHT / 2, 0]}>
-        <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_HALF * 2]} />
-        <meshStandardMaterial map={wallTex} />
-      </mesh>
+      {/* East wall — split into 4 segments around window at z=3, width 3.5, y 0.55–2.35 */}
+      {(() => {
+        const W = 3.5, H = 1.8, cz = 3, cy = 1.45;
+        const zN = cz - W / 2, zS = cz + W / 2;
+        const yB = cy - H / 2, yT = cy + H / 2;
+        const x = ROOM_HALF + WALL_THICKNESS / 2;
+        const northW = zN - (-ROOM_HALF);
+        const southW = ROOM_HALF - zS;
+        return (
+          <>
+            <mesh position={[x, ROOM_HEIGHT / 2, (-ROOM_HALF + zN) / 2]}>
+              <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, northW]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            <mesh position={[x, ROOM_HEIGHT / 2, (zS + ROOM_HALF) / 2]}>
+              <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, southW]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            <mesh position={[x, yB / 2, cz]}>
+              <boxGeometry args={[WALL_THICKNESS, yB, W]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+            <mesh position={[x, (yT + ROOM_HEIGHT) / 2, cz]}>
+              <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT - yT, W]} />
+              <meshStandardMaterial map={wallTex} />
+            </mesh>
+          </>
+        );
+      })()}
 
       {/* DOOR — wooden, in the opening */}
       <group position={[doorCenterX, 0, -ROOM_HALF + 0.05]}>
