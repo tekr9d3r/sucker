@@ -1,58 +1,69 @@
 
-# 1st-Person Roomba Speed-Cleaner Sim
 
-A 3D first-person vacuum simulator where you race to clean every inch of an apartment as fast as possible. Built with React Three Fiber on a TanStack Start route.
+## Add Neon-backed Leaderboard
 
-## Gameplay
-- **Perspective**: First-person camera at ~0.2 units high with a wide 95° FOV for that fisheye, "I am the vacuum" feel.
-- **Controls**: 
-  - `W` / `↑` — forward, `S` / `↓` — backward
-  - `A` / `←` and `D` / `→` — rotate left/right
-  - `Shift` — turbo boost (short bursts)
-  - `R` — restart
-- **Movement feel**: Subtle vertical bobbing while moving, slight camera tilt on rotation, smooth acceleration so it feels like a real Roomba — not a spaceship.
-- **Collisions**: AABB collision against walls and obstacles. Hitting something triggers a quick screen shake + soft "thud" sound and a red vignette flash.
+A global top-10 leaderboard for Roomba Speed Clean, backed by your own Neon Postgres database (free tier, fully portable — you own the connection string and can move/export it any time).
 
-## The Apartment
-- A single open-plan room (~20×20 units) with 4 walls, ceiling, and a wooden-plank floor.
-- Obstacles to navigate around:
-  - Sofa (large box)
-  - Coffee table with 4 cylindrical legs (you can drive *under* it — the fun part)
-  - Dining table with 4 legs + 2 chairs
-  - A potted plant (cylinder + sphere)
-  - A TV stand
-- Soft warm lighting + one window light to give the floor visual variety.
+### What you'll get
 
-## Cleaning Mechanic
-- Floor is divided into a **60×60 invisible grid** (3,600 cells, performant).
-- Every cell starts "dirty" — rendered as dust/lint specks via an instanced mesh overlay so it's cheap.
-- As the Roomba passes over a cell (within its ~0.4 unit radius), the dust instances in that cell are removed and the floor underneath is revealed clean & slightly shiny.
-- A subtle vacuum suction sound loops while cleaning new cells (pitch-shifts when on already-clean ground).
+- **Start screen**: a "Your name" input. Saved to `localStorage` so it auto-fills on every run.
+- **Complete screen**: after a win, your final time (run time + damage penalty) is auto-submitted to the leaderboard, then a Top 10 panel appears showing rank, name, and time.
+- **If you didn't make Top 10**: an extra row below the table shows your rank (e.g. `47.  YourName  01:42.30`) so you always see where you stand.
+- **Game Over (cat hit)**: no submission — only completed runs are scored.
+- **Best time** still tracked locally per browser, shown alongside the global board.
 
-## HUD (Tailwind, fixed overlay)
-- **Top-left**: Live timer `00:00.00` (centiseconds, monospace).
-- **Top-center**: Cleaning progress bar with % cleaned.
-- **Top-right**: Mini-map — top-down view of the room showing cleaned vs dirty cells and the player's position + facing arrow. Essential for finding missed spots under furniture.
-- **Bottom-center**: Subtle control hints (fades after 5 seconds).
-- **Center crosshair**: tiny dot for orientation.
+### Why Neon (vs Lovable Cloud)
 
-## Game States
-1. **Start screen**: Title, brief instructions, "Start Cleaning" button. Click to lock pointer and begin.
-2. **Playing**: Timer runs, progress climbs.
-3. **Mission Complete** (at 100%): Stops timer, shows final time prominently, displays a "Personal Best" if beaten (stored in localStorage), and a "Clean Again" button to restart with a fresh dirty floor.
+- Standard Postgres — `pg_dump`, point any other host (Supabase, Railway, Fly, RDS) at the dump and it just works.
+- Free tier: 0.5 GB, no card required.
+- The connection string lives in a server-side environment variable. Moving away from Lovable later = copy that string into your new host's env vars. Nothing else changes.
 
-## Visual Style
-- Cozy apartment vibe: warm cream walls, oak floor, soft ambient + directional lighting.
-- Slight motion blur / speed lines effect when boosting via Shift.
-- Clean-cell shine effect: a brief sparkle particle when a new cell is cleaned for satisfying feedback.
+### Setup you'll do once (3 minutes)
 
-## Technical Approach
-- New route: `src/routes/index.tsx` becomes the game (replaces placeholder).
-- New components: `Game.tsx` (Canvas + state), `Roomba.tsx` (player controller + camera), `Apartment.tsx` (room + obstacles), `DirtField.tsx` (instanced dust overlay + cleaning logic), `HUD.tsx`, `MiniMap.tsx`, `StartScreen.tsx`, `CompleteScreen.tsx`.
-- Custom hook: `useKeyboard.ts` for input, `useGameStore.ts` (Zustand) for game state (time, progress, status, best time).
-- Dependencies to add: `three`, `@react-three/fiber`, `@react-three/drei`, `zustand`.
-- Sounds generated via Web Audio API (no asset files needed) — thud, suction loop, victory chime.
-- Game loop runs in `useFrame`; HUD reads from Zustand for non-React-tree updates without re-rendering the Canvas.
+1. Sign up at [neon.tech](https://neon.tech) (free, GitHub login).
+2. Create a project → copy the **pooled connection string** (looks like `postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require`).
+3. Paste it when I ask for the `DATABASE_URL` secret.
 
-## Out of Scope (for v1)
-No enemies, pets, or hazards yet — pure speed-cleaning focus. We can add a wandering dog, water spills, or "boss rooms" (kitchen, bathroom) in a follow-up once the core feel is dialed in.
+I'll run the table-creation SQL for you against your Neon DB the first time the server function boots (idempotent `CREATE TABLE IF NOT EXISTS`), so no manual SQL needed.
+
+### Schema (single table, exportable anywhere)
+
+```sql
+CREATE TABLE IF NOT EXISTS leaderboard (
+  id          BIGSERIAL PRIMARY KEY,
+  name        TEXT      NOT NULL,
+  time_ms     INTEGER   NOT NULL,   -- final time incl. damage penalty
+  damage_pct  SMALLINT  NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS leaderboard_time_idx ON leaderboard (time_ms ASC);
+```
+
+### Technical approach
+
+- **Add dep**: `@neondatabase/serverless` (HTTP driver — works in Cloudflare Workers SSR runtime, no Node TCP needed).
+- **Secret**: `DATABASE_URL` (runtime secret, server-only, never bundled to client).
+- **Two server functions** in `src/utils/leaderboard.functions.ts`:
+  - `submitScore({ name, timeMs, damagePct })` — Zod-validated (name 1–24 chars, time 1000–600000ms), inserts row, returns `{ rank, top: Entry[], you: Entry }`.
+  - `getLeaderboard()` — returns top 10 for the Start screen preview.
+- **Validation**: name trimmed, max 24 chars, regex `^[\p{L}\p{N} _.\-]+$`; time bounds enforced server-side.
+- **Rate limiting**: simple in-memory token bucket (1 submit / 3s per IP) inside the server fn — fine for a casual game; documented as not bulletproof.
+- **State store** (`useGameStore.ts`): add `playerName: string`, `setPlayerName`, plus `submissionState: 'idle' | 'submitting' | 'done' | 'error'` and `leaderboard: { top: Entry[]; yourRank: number | null }`.
+- **UI changes**:
+  - `StartScreen.tsx` — name input (required to start), small "Top 10" preview list fetched on mount via TanStack Query.
+  - `CompleteScreen.tsx` — auto-submit on mount when `status === 'complete'`; render Top 10 + your row; "Clean Again" button unchanged.
+- **Files touched / created**:
+  - new: `src/utils/leaderboard.functions.ts`, `src/utils/leaderboard.server.ts` (Neon client + ensureSchema), `src/game/Leaderboard.tsx` (shared display component)
+  - edited: `src/game/useGameStore.ts`, `src/game/StartScreen.tsx`, `src/game/CompleteScreen.tsx`, `package.json`
+- **Router**: QueryClientProvider isn't set up yet — I'll add it in `__root.tsx` and `router.tsx` per the framework requirement, since we'll use `useQuery` for the leaderboard fetch.
+
+### Portability guarantee
+
+When you leave Lovable: `pg_dump $DATABASE_URL > leaderboard.sql`, point new host at the dump, update `DATABASE_URL` env var on the new host. Done. No Lovable-specific tables, no proprietary SDK, no vendor lock.
+
+### Out of scope (v1)
+
+- No profanity filter (can add a small wordlist later if spam appears).
+- No per-day/weekly boards — single all-time list. Easy to add later with a `WHERE created_at > now() - interval '7 days'`.
+- No edit/delete UI — moderation via direct SQL on Neon if needed.
+
