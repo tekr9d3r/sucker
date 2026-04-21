@@ -508,27 +508,75 @@ export const Apartment = () => {
         )}
       </group>
 
-      {/* Potted plant */}
+      {/* Potted fiddle-leaf fig in corner */}
       <group position={[7, 0, -7]}>
         <mesh position={[0, 0.4, 0]} castShadow>
           <cylinderGeometry args={[0.45, 0.35, 0.8, 16]} />
-          <meshStandardMaterial color={plantPotColor} roughness={0.7} />
+          <meshStandardMaterial color={plantPotColor} roughness={0.85} />
         </mesh>
-        <mesh position={[0, 0.8, 0]}>
-          <cylinderGeometry args={[0.42, 0.42, 0.05, 16]} />
-          <meshStandardMaterial color="#3a2515" />
+        <mesh position={[0, 0.78, 0]}>
+          <cylinderGeometry args={[0.48, 0.45, 0.06, 16]} />
+          <meshStandardMaterial color="#8a4a26" roughness={0.85} />
         </mesh>
-        <mesh position={[0, 1.3, 0]} castShadow>
-          <sphereGeometry args={[0.55, 16, 16]} />
-          <meshStandardMaterial color={plantLeafColor} />
+        <mesh position={[0, 0.81, 0]}>
+          <cylinderGeometry args={[0.42, 0.42, 0.04, 16]} />
+          <meshStandardMaterial color="#2a1a10" roughness={1} />
         </mesh>
-        <mesh position={[0.3, 1.6, 0.1]} castShadow>
-          <sphereGeometry args={[0.4, 12, 12]} />
-          <meshStandardMaterial color="#4d8a4d" />
+        {/* Trunk */}
+        <mesh position={[0, 1.1, 0]} castShadow>
+          <cylinderGeometry args={[0.04, 0.06, 0.6, 8]} />
+          <meshStandardMaterial color="#6b4a2a" />
         </mesh>
-        <mesh position={[-0.25, 1.55, -0.1]} castShadow>
-          <sphereGeometry args={[0.35, 12, 12]} />
-          <meshStandardMaterial color="#356b35" />
+        {/* Leaves */}
+        {[
+          { p: [0, 1.5, 0.25] as [number, number, number], r: [0.1, 0, 0.2] as [number, number, number], s: 0.45 },
+          { p: [0.25, 1.6, -0.15] as [number, number, number], r: [-0.2, 0.5, -0.3] as [number, number, number], s: 0.4 },
+          { p: [-0.2, 1.7, 0.1] as [number, number, number], r: [0.1, -0.4, 0.4] as [number, number, number], s: 0.42 },
+          { p: [0.15, 1.85, 0.2] as [number, number, number], r: [-0.3, 0.2, -0.2] as [number, number, number], s: 0.38 },
+          { p: [-0.15, 2.0, -0.2] as [number, number, number], r: [0.2, -0.6, 0.3] as [number, number, number], s: 0.4 },
+          { p: [0.05, 2.15, 0.15] as [number, number, number], r: [-0.4, 0.3, 0] as [number, number, number], s: 0.36 },
+        ].map((l, i) => (
+          <mesh key={`leaf-${i}`} position={l.p} rotation={l.r} castShadow>
+            <sphereGeometry args={[l.s, 12, 8]} />
+            <meshStandardMaterial color={i % 2 === 0 ? plantLeafColor : "#4d8a4d"} roughness={0.7} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Floor lamp by sofa corner */}
+      <group position={[-7, 0, -5]}>
+        <mesh position={[0, 0.05, 0]}>
+          <cylinderGeometry args={[0.25, 0.3, 0.05, 16]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        <mesh position={[0, 0.85, 0]}>
+          <cylinderGeometry args={[0.02, 0.02, 1.6, 8]} />
+          <meshStandardMaterial color="#1a1a1a" metalness={0.7} roughness={0.4} />
+        </mesh>
+        <mesh position={[0, 1.7, 0]} castShadow>
+          <cylinderGeometry args={[0.18, 0.28, 0.4, 16]} />
+          <meshStandardMaterial color="#fff5d6" emissive="#ffd88a" emissiveIntensity={0.4} roughness={0.9} />
+        </mesh>
+        <pointLight position={[0, 1.7, 0]} intensity={0.35} color="#ffd88a" distance={5} />
+      </group>
+
+      {/* Wall clock on south wall (next to door area) */}
+      <group position={[-3, 2.3, ROOM_HALF - 0.06]} rotation={[0, Math.PI, 0]}>
+        <mesh>
+          <cylinderGeometry args={[0.3, 0.3, 0.04, 24]} rotation={[Math.PI / 2, 0, 0]} />
+          <meshStandardMaterial color="#2a2018" />
+        </mesh>
+        <mesh position={[0, 0, 0.025]}>
+          <cylinderGeometry args={[0.27, 0.27, 0.005, 24]} />
+          <meshStandardMaterial color="#fafafa" />
+        </mesh>
+        <mesh position={[0.05, 0.04, 0.04]} rotation={[0, 0, -0.4]}>
+          <boxGeometry args={[0.16, 0.02, 0.005]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        <mesh position={[0, 0.1, 0.04]} rotation={[0, 0, 0.2]}>
+          <boxGeometry args={[0.02, 0.22, 0.005]} />
+          <meshStandardMaterial color="#1a1a1a" />
         </mesh>
       </group>
 
