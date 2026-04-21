@@ -94,9 +94,16 @@ export const startSuction = () => {
 export const setSuctionIntensity = (v: number) => {
   if (!suctionMaster || !ctx) return;
   const clamped = Math.max(0, Math.min(1, v));
-  // v=0 → silence (not playing). v=0.2 (idle/still) → 0.5. v=1.0 → 0.6.
-  const target = clamped === 0 ? 0 : Math.max(0, 0.5 + (clamped - 0.2) * 0.125);
-  suctionMaster.gain.linearRampToValueAtTime(target, ctx.currentTime + 0.08);
+
+  suctionMaster.gain.linearRampToValueAtTime(clamped * 0.65, ctx.currentTime + 0.08);
+
+  // Subtle pitch rise: only 2% at max intensity (was 10% — too noticeable)
+  const pitchScale = 1 + clamped * 0.02;
+  motorOscs.forEach((osc, i) => {
+    const isWhine = i >= 4;
+    const base = isWhine ? 2600 : MOTOR_BASE_HZ * (i + 1);
+    osc.frequency.linearRampToValueAtTime(base * pitchScale, ctx!.currentTime + 0.15);
+  });
 };
 
 export const stopSuction = () => {
