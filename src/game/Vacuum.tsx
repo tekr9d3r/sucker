@@ -107,7 +107,8 @@ export const Vacuum = ({ playerRef, onShake }: Props) => {
     playerRef.current.yaw = yaw;
     setPlayer(x, z, yaw);
 
-    setMovementIntensity(playing ? speedFrac : 0);
+    // 0.2 base while playing (idle hum), scales up to 1.0 at full speed
+    setMovementIntensity(playing ? (0.2 + speedFrac * 0.8) : 0);
 
     if (playing && startTimeRef.current !== null) {
       tickTime(performance.now() - startTimeRef.current);

@@ -46,41 +46,7 @@ function stopMovementSound(): void {
   if (movementGain) { movementGain.disconnect(); movementGain = null; }
 }
 
-// ── Melody state ──────────────────────────────────────────────────────────────
-let melodyGain: GainNode | null = null;
-let melodyActive = false;
-let melodyLoopTimer: ReturnType<typeof setTimeout> | null = null;
-
-const BPM = 118;
-const SPB = 60 / BPM; // seconds per beat
-
-// Upbeat 16-beat loop in C major. [freq_hz, beats] — 0 = rest.
-const MELODY: [number, number][] = [
-  [659.25, 0.5],  // E5
-  [587.33, 0.5],  // D5
-  [523.25, 1.0],  // C5
-  [392.00, 0.5],  // G4
-  [440.00, 0.5],  // A4
-  [523.25, 1.0],  // C5
-  [659.25, 0.5],  // E5
-  [783.99, 0.5],  // G5
-  [659.25, 0.5],  // E5
-  [587.33, 0.5],  // D5
-  [523.25, 2.0],  // C5 (held)
-  [0,      0.5],  // rest
-  [440.00, 0.5],  // A4
-  [523.25, 0.5],  // C5
-  [587.33, 0.5],  // D5
-  [659.25, 1.0],  // E5
-  [587.33, 0.5],  // D5
-  [523.25, 0.5],  // C5
-  [493.88, 0.5],  // B4
-  [440.00, 0.5],  // A4
-  [523.25, 2.0],  // C5 (held)
-  [0,      1.0],  // rest
-];
-
-const MELODY_DUR_S = MELODY.reduce((s, [, b]) => s + b * SPB, 0);
+// ─────────────────────────────────────────────────────────────────────────────
 
 const getCtx = (): AudioContext | null => {
   if (typeof window === "undefined") return null;
@@ -92,80 +58,23 @@ const getCtx = (): AudioContext | null => {
   return ctx;
 };
 
-function scheduleMelodyLoop(c: AudioContext, startAt: number): void {
-  if (!melodyActive || !melodyGain) return;
-  let t = startAt;
-  for (const [freq, beats] of MELODY) {
-    if (freq > 0) {
-      const dur = beats * SPB;
-      const osc = c.createOscillator();
-      osc.type = "triangle";
-      osc.frequency.value = freq;
-      const g = c.createGain();
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.2, t + 0.018);
-      g.gain.setValueAtTime(0.17, t + dur * 0.72);
-      g.gain.linearRampToValueAtTime(0, t + dur * 0.9);
-      osc.connect(g).connect(melodyGain!);
-      osc.start(t);
-      osc.stop(t + dur);
-    }
-    t += beats * SPB;
-  }
-  // Re-schedule 150 ms before loop ends to avoid gaps
-  const msUntilReschedule = Math.max(0, (startAt + MELODY_DUR_S - c.currentTime - 0.15) * 1000);
-  melodyLoopTimer = setTimeout(() => {
-    const c2 = getCtx();
-    if (c2 && melodyActive) scheduleMelodyLoop(c2, startAt + MELODY_DUR_S);
-  }, msUntilReschedule);
-}
-
-function startMelody(): void {
-  const c = getCtx();
-  if (!c || melodyActive) return;
-  melodyActive = true;
-  melodyGain = c.createGain();
-  melodyGain.gain.value = 0.38;
-  melodyGain.connect(c.destination);
-  scheduleMelodyLoop(c, c.currentTime + 0.05);
-}
-
-function stopMelody(): void {
-  melodyActive = false;
-  if (melodyLoopTimer !== null) { clearTimeout(melodyLoopTimer); melodyLoopTimer = null; }
-  if (melodyGain) {
-    const c = getCtx();
-    if (c) melodyGain.gain.linearRampToValueAtTime(0, c.currentTime + 0.4);
-    setTimeout(() => { melodyGain?.disconnect(); melodyGain = null; }, 500);
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
 export const startSuction = () => {
   const c = getCtx();
   if (!c) return;
-
-  startMelody();
-
-  // Load MP3 and start movement sound (async, starts playing once buffer is ready)
   loadMovementBuffer().then((buf) => {
     if (buf && !movementSource) startMovementSound();
   });
 };
 
 export const stopSuction = () => {
-  stopMelody();
   stopMovementSound();
 };
 
-// v: 0 = silent (game not playing), 0–1 = idle-to-fast movement
+// v: 0 = silent (game not playing), 0–1 = idle-to-fast (always audible while playing)
 export const setMovementIntensity = (v: number) => {
   if (!movementGain || !ctx) return;
   const clamped = Math.max(0, Math.min(1, v));
-  // Quiet when still (0.12), loud when moving fast (0.85)
-  const targetGain = clamped < 0.01 ? 0 : 0.12 + clamped * 0.73;
-  movementGain.gain.linearRampToValueAtTime(targetGain, ctx.currentTime + 0.1);
+  movementGain.gain.linearRampToValueAtTime(clamped * 0.8, ctx.currentTime + 0.1);
 };
 
 export const playThud = () => {
