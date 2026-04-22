@@ -1,5 +1,7 @@
 # Sucker
 
+![Sucker screenshot](public/screen-shot.jpeg)
+
 A first-person speed-cleaning game built with React Three Fiber. You are the vacuum — race the clock to sweep every speck of dust from the apartment before time runs out, and don't bump into the cat.
 
 **Live:** https://vacuum-game-nine.vercel.app
