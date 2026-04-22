@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useGameStore } from "./useGameStore";
 import { resumeAudio, startSuction } from "./audio";
 import { getLeaderboard, type LeaderboardEntry } from "@/server/leaderboard.functions";
-import vacuumLogo from "@/assets/vacuum-game-logo.png";
+import vacuumLogo from "@/assets/sucker-logo.png";
 
 const formatTime = (ms: number): string => {
   const totalCs = Math.floor(ms / 10);
@@ -72,12 +72,12 @@ export const StartScreen = () => {
         <div className="w-full max-w-md rounded-2xl border border-white/10 bg-black/50 p-8 text-center shadow-2xl">
           <img
             src={vacuumLogo}
-            alt="Vacuum Game logo"
+            alt="Sucker logo"
             className="mx-auto mb-4 h-40 w-40 drop-shadow-[0_8px_24px_rgba(56,189,248,0.35)]"
             width={160}
             height={160}
           />
-          <h1 className="sr-only">Vacuum Game</h1>
+          <h1 className="sr-only">Sucker</h1>
           <p className="mb-6 text-sm text-white/70">
             You ARE the vacuum. Race the clock to leave a shiny clean trail behind you.
           </p>
