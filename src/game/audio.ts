@@ -4,6 +4,52 @@ let suctionMaster: GainNode | null = null;
 let motorOscs: OscillatorNode[] = [];
 let suctionBuffers: AudioBufferSourceNode[] = [];
 
+// ── Movement sound (MP3) ──────────────────────────────────────────────────────
+let movementSource: AudioBufferSourceNode | null = null;
+let movementGain: GainNode | null = null;
+let movementBuffer: AudioBuffer | null = null;
+let movementBufferLoading = false;
+
+async function loadMovementBuffer(): Promise<AudioBuffer | null> {
+  if (movementBuffer) return movementBuffer;
+  if (movementBufferLoading) return null;
+  movementBufferLoading = true;
+  try {
+    const res = await fetch("/sound-sucker.mp3");
+    const arrayBuf = await res.arrayBuffer();
+    const c = getCtx();
+    if (!c) return null;
+    movementBuffer = await c.decodeAudioData(arrayBuf);
+    return movementBuffer;
+  } catch {
+    return null;
+  }
+}
+
+function startMovementSound(): void {
+  const c = getCtx();
+  if (!c || movementSource) return;
+  const buf = movementBuffer;
+  if (!buf) return;
+  movementGain = c.createGain();
+  movementGain.gain.value = 0;
+  movementGain.connect(c.destination);
+  movementSource = c.createBufferSource();
+  movementSource.buffer = buf;
+  movementSource.loop = true;
+  movementSource.connect(movementGain);
+  movementSource.start();
+}
+
+function stopMovementSound(): void {
+  if (movementSource) {
+    try { movementSource.stop(); } catch { /* noop */ }
+    movementSource.disconnect();
+    movementSource = null;
+  }
+  if (movementGain) { movementGain.disconnect(); movementGain = null; }
+}
+
 // ── Melody state ──────────────────────────────────────────────────────────────
 let melodyGain: GainNode | null = null;
 let melodyActive = false;
@@ -172,6 +218,11 @@ export const startSuction = () => {
   suctionBuffers.push(rumbleNoise);
 
   startMelody();
+
+  // Load MP3 and start movement sound (async, starts playing once buffer is ready)
+  loadMovementBuffer().then((buf) => {
+    if (buf && !movementSource) startMovementSound();
+  });
 };
 
 export const setSuctionIntensity = (v: number) => {
@@ -191,11 +242,21 @@ export const setSuctionIntensity = (v: number) => {
 
 export const stopSuction = () => {
   stopMelody();
+  stopMovementSound();
   motorOscs.forEach((o) => { try { o.stop(); } catch { /* noop */ } o.disconnect(); });
   motorOscs = [];
   suctionBuffers.forEach((b) => { try { b.stop(); } catch { /* noop */ } b.disconnect(); });
   suctionBuffers = [];
   if (suctionMaster) { suctionMaster.disconnect(); suctionMaster = null; }
+};
+
+// v: 0 = silent (game not playing), 0–1 = idle-to-fast movement
+export const setMovementIntensity = (v: number) => {
+  if (!movementGain || !ctx) return;
+  const clamped = Math.max(0, Math.min(1, v));
+  // Quiet when still (0.12), loud when moving fast (0.85)
+  const targetGain = clamped < 0.01 ? 0 : 0.12 + clamped * 0.73;
+  movementGain.gain.linearRampToValueAtTime(targetGain, ctx.currentTime + 0.1);
 };
 
 export const playThud = () => {

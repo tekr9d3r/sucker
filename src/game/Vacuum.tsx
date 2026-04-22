@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { useKeyboard } from "./useKeyboard";
 import { resolveCollision } from "./obstacles";
 import { useGameStore } from "./useGameStore";
-import { playThud, setSuctionIntensity } from "./audio";
+import { playThud, setSuctionIntensity, setMovementIntensity } from "./audio";
 
 interface Props {
   playerRef: React.MutableRefObject<{ x: number; z: number; yaw?: number }>;
@@ -109,6 +109,7 @@ export const Vacuum = ({ playerRef, onShake }: Props) => {
 
     const rate = (window as unknown as { __cleaningRate?: number }).__cleaningRate ?? 0;
     setSuctionIntensity(playing ? Math.min(1, 0.2 + rate * 0.15) : 0);
+    setMovementIntensity(playing ? speedFrac : 0);
 
     if (playing && startTimeRef.current !== null) {
       tickTime(performance.now() - startTimeRef.current);
