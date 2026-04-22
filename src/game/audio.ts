@@ -125,9 +125,9 @@ export const stopSuction = () => {
 export const setMovementIntensity = (v: number) => {
   if (!movementGain || !ctx) return;
   const clamped = Math.max(0, Math.min(1, v));
-  const targetGain = clamped * 0.35;
+  const targetGain = clamped * 0.245;
   // Fade-down is 3x slower than fade-up for a natural trailing-off feel
-  const rampTime = targetGain < movementGain.gain.value ? 0.3 : 0.1;
+  const rampTime = targetGain < movementGain.gain.value ? 0.6 : 0.1;
   movementGain.gain.linearRampToValueAtTime(targetGain, ctx.currentTime + rampTime);
 };
 
