@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Game } from "@/game/Game";
 
 export const Route = createFileRoute("/")({
@@ -35,5 +36,16 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-white/60 text-sm tracking-widest uppercase">
+        Loading…
+      </div>
+    );
+  }
+
   return <Game />;
 }
