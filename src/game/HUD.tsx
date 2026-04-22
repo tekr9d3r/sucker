@@ -30,7 +30,7 @@ export const HUD = () => {
 
   if (status !== "playing") return null;
 
-  const pct = Math.round(progress * 100);
+  const pct = Math.min(100, Math.round((progress / 0.8) * 100));
   const damagePct = Math.round(damage);
   const damageColor =
     damage < 30 ? "from-emerald-400 to-yellow-300" : damage < 70 ? "from-yellow-400 to-orange-400" : "from-orange-500 to-red-500";
