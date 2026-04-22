@@ -121,14 +121,18 @@ export const stopSuction = () => {
 };
 
 // v: 0 = silent (game not playing), 0–1 = idle-to-fast
-// Vacuum is secondary to melody so max gain is kept lower (0.35)
+// Vacuum is secondary to melody so max gain is kept lower (0.12 max).
+// Uses setTargetAtTime so repeated per-frame calls don't cause ramp glitches.
 export const setMovementIntensity = (v: number) => {
   if (!movementGain || !ctx) return;
   const clamped = Math.max(0, Math.min(1, v));
   const targetGain = clamped * 0.12;
-  // Fade-down is 3x slower than fade-up for a natural trailing-off feel
-  const rampTime = targetGain < movementGain.gain.value ? 0.6 : 0.1;
-  movementGain.gain.linearRampToValueAtTime(targetGain, ctx.currentTime + rampTime);
+  // Time constant: ~0.05s to get louder (snappy), ~0.18s to get quieter (trailing off).
+  // setTargetAtTime reaches ~95% of target after 3× the time constant.
+  const tau = targetGain > movementGain.gain.value ? 0.05 : 0.18;
+  movementGain.gain.cancelScheduledValues(ctx.currentTime);
+  movementGain.gain.setValueAtTime(movementGain.gain.value, ctx.currentTime);
+  movementGain.gain.setTargetAtTime(targetGain, ctx.currentTime, tau);
 };
 
 export const playThud = () => {
