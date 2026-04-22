@@ -19,6 +19,8 @@ export const useKeyboard = (onRestart?: () => void) => {
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
       switch (e.code) {
         case "KeyW":
         case "ArrowUp":
