@@ -30,7 +30,7 @@ export const Game = () => {
 
   return (
     <div
-      className="relative h-screen w-screen overflow-hidden bg-black"
+      className="relative h-screen w-screen overflow-hidden bg-black touch-none"
       style={{
         transform:
           shake > 0
