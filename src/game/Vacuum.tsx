@@ -4,6 +4,7 @@ import { useKeyboard } from "./useKeyboard";
 import { resolveCollision } from "./obstacles";
 import { useGameStore } from "./useGameStore";
 import { playThud, setMovementIntensity } from "./audio";
+import { mobileKeys } from "./inputState";
 
 interface Props {
   playerRef: React.MutableRefObject<{ x: number; z: number; yaw?: number }>;
@@ -49,7 +50,14 @@ export const Vacuum = ({ playerRef, onShake }: Props) => {
   }, [status, playerRef]);
 
   useFrame((_, dt) => {
-    const k = keys.current;
+    const kb = keys.current;
+    const k = {
+      forward:  kb.forward  || mobileKeys.forward,
+      backward: kb.backward || mobileKeys.backward,
+      left:     kb.left     || mobileKeys.left,
+      right:    kb.right    || mobileKeys.right,
+      boost:    kb.boost    || mobileKeys.boost,
+    };
     const playing = status === "playing";
 
     if (playing) {

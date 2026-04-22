@@ -11,6 +11,7 @@ import { CompleteScreen } from "./CompleteScreen";
 import { GameOverScreen } from "./GameOverScreen";
 import { useGameStore } from "./useGameStore";
 import { stopSuction } from "./audio";
+import { MobileControls } from "./MobileControls";
 
 export const Game = () => {
   const playerRef = useRef({ x: 0, z: 5, yaw: Math.PI });
@@ -70,6 +71,7 @@ export const Game = () => {
       />
 
       <HUD />
+      <MobileControls onRestart={() => useGameStore.getState().reset()} />
       <StartScreen />
       <CompleteScreen />
       <GameOverScreen />
