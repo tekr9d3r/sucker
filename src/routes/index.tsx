@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
-
-const Game = lazy(() => import("@/game/Game").then((m) => ({ default: m.Game })));
+import { Game } from "@/game/Game";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -37,15 +35,5 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-white">
-          Loading…
-        </div>
-      }
-    >
-      <Game />
-    </Suspense>
-  );
+  return <Game />;
 }
