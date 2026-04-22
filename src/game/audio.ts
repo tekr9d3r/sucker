@@ -1,6 +1,52 @@
 let ctx: AudioContext | null = null;
 
-// ── Movement sound (MP3) ──────────────────────────────────────────────────────
+// ── Melody (main background track) ───────────────────────────────────────────
+let melodySource: AudioBufferSourceNode | null = null;
+let melodyGain: GainNode | null = null;
+let melodyBuffer: AudioBuffer | null = null;
+let melodyBufferLoading = false;
+
+async function loadMelodyBuffer(): Promise<AudioBuffer | null> {
+  if (melodyBuffer) return melodyBuffer;
+  if (melodyBufferLoading) return null;
+  melodyBufferLoading = true;
+  try {
+    const res = await fetch("/sucker-song-melody.mp3");
+    const arrayBuf = await res.arrayBuffer();
+    const c = getCtx();
+    if (!c) return null;
+    melodyBuffer = await c.decodeAudioData(arrayBuf);
+    return melodyBuffer;
+  } catch {
+    return null;
+  }
+}
+
+function startMelodySound(): void {
+  const c = getCtx();
+  if (!c || melodySource) return;
+  const buf = melodyBuffer;
+  if (!buf) return;
+  melodyGain = c.createGain();
+  melodyGain.gain.value = 0.85;
+  melodyGain.connect(c.destination);
+  melodySource = c.createBufferSource();
+  melodySource.buffer = buf;
+  melodySource.loop = true;
+  melodySource.connect(melodyGain);
+  melodySource.start();
+}
+
+function stopMelodySound(): void {
+  if (melodySource) {
+    try { melodySource.stop(); } catch { /* noop */ }
+    melodySource.disconnect();
+    melodySource = null;
+  }
+  if (melodyGain) { melodyGain.disconnect(); melodyGain = null; }
+}
+
+// ── Movement sound (vacuum) ───────────────────────────────────────────────────
 let movementSource: AudioBufferSourceNode | null = null;
 let movementGain: GainNode | null = null;
 let movementBuffer: AudioBuffer | null = null;
@@ -61,20 +107,25 @@ const getCtx = (): AudioContext | null => {
 export const startSuction = () => {
   const c = getCtx();
   if (!c) return;
+  loadMelodyBuffer().then((buf) => {
+    if (buf && !melodySource) startMelodySound();
+  });
   loadMovementBuffer().then((buf) => {
     if (buf && !movementSource) startMovementSound();
   });
 };
 
 export const stopSuction = () => {
+  stopMelodySound();
   stopMovementSound();
 };
 
-// v: 0 = silent (game not playing), 0–1 = idle-to-fast (always audible while playing)
+// v: 0 = silent (game not playing), 0–1 = idle-to-fast
+// Vacuum is secondary to melody so max gain is kept lower (0.35)
 export const setMovementIntensity = (v: number) => {
   if (!movementGain || !ctx) return;
   const clamped = Math.max(0, Math.min(1, v));
-  movementGain.gain.linearRampToValueAtTime(clamped * 0.8, ctx.currentTime + 0.1);
+  movementGain.gain.linearRampToValueAtTime(clamped * 0.35, ctx.currentTime + 0.1);
 };
 
 export const playThud = () => {
