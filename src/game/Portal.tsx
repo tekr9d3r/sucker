@@ -129,6 +129,7 @@ export function Portal({ playerRef }: PortalProps) {
   const refUrl = params.get("ref") ?? "";
 
   const playerName = useGameStore((s) => s.playerName);
+  const setPortalPrompt = useGameStore((s) => s.setPortalPrompt);
 
   const exitParticleGeo = useMemo(() => makeParticleGeo(EXIT_COLOR), []);
   const startParticleGeo = useMemo(
@@ -138,50 +139,49 @@ export function Portal({ playerRef }: PortalProps) {
 
   const exitParticleRef = useRef<THREE.BufferGeometry | null>(null);
   const startParticleRef = useRef<THREE.BufferGeometry | null>(null);
-  const triggeredRef = useRef(false);
+  const nearExitRef = useRef(false);
+  const nearStartRef = useRef(false);
 
   useFrame(() => {
     const t = Date.now() * 0.001;
 
-    // animate exit particles
     if (exitParticleRef.current) {
       const arr = exitParticleRef.current.attributes.position.array as Float32Array;
-      for (let i = 0; i < arr.length; i += 3) {
-        arr[i + 1] += 0.012 * Math.sin(t + i);
-      }
+      for (let i = 0; i < arr.length; i += 3) arr[i + 1] += 0.012 * Math.sin(t + i);
       exitParticleRef.current.attributes.position.needsUpdate = true;
     }
-
-    // animate start particles
     if (startParticleRef.current) {
       const arr = startParticleRef.current.attributes.position.array as Float32Array;
-      for (let i = 0; i < arr.length; i += 3) {
-        arr[i + 1] += 0.012 * Math.sin(t + i);
-      }
+      for (let i = 0; i < arr.length; i += 3) arr[i + 1] += 0.012 * Math.sin(t + i);
       startParticleRef.current.attributes.position.needsUpdate = true;
     }
-
-    if (triggeredRef.current) return;
 
     const px = playerRef.current.x;
     const pz = playerRef.current.z;
 
-    // exit portal collision
+    // Exit portal proximity — show prompt on enter, clear on leave
     const exDx = px - EXIT_POS[0];
     const exDz = pz - EXIT_POS[2];
-    if (Math.sqrt(exDx * exDx + exDz * exDz) < TRIGGER_DIST) {
-      triggeredRef.current = true;
-      window.location.href = buildExitUrl(playerName || "player");
-      return;
+    const nearExit = Math.sqrt(exDx * exDx + exDz * exDz) < TRIGGER_DIST;
+    if (nearExit && !nearExitRef.current) {
+      nearExitRef.current = true;
+      setPortalPrompt({ url: buildExitUrl(playerName || "player"), label: "✦ Vibe Jam Portal ✦" });
+    } else if (!nearExit && nearExitRef.current) {
+      nearExitRef.current = false;
+      setPortalPrompt(null);
     }
 
-    // start portal (return) collision — only when came from portal with a ref
+    // Return portal proximity
     if (isPortalEntry && refUrl) {
       const stDx = px - START_POS[0];
       const stDz = pz - START_POS[2];
-      if (Math.sqrt(stDx * stDx + stDz * stDz) < TRIGGER_DIST) {
-        triggeredRef.current = true;
-        window.location.href = buildReturnUrl(refUrl, playerName || "player");
+      const nearStart = Math.sqrt(stDx * stDx + stDz * stDz) < TRIGGER_DIST;
+      if (nearStart && !nearStartRef.current) {
+        nearStartRef.current = true;
+        setPortalPrompt({ url: buildReturnUrl(refUrl, playerName || "player"), label: startLabel });
+      } else if (!nearStart && nearStartRef.current) {
+        nearStartRef.current = false;
+        setPortalPrompt(null);
       }
     }
   });

@@ -50,6 +50,9 @@ export const Vacuum = ({ playerRef, onShake }: Props) => {
   }, [status, playerRef]);
 
   useFrame((_, dt) => {
+    // Freeze all movement while a portal prompt is on screen
+    if (useGameStore.getState().portalPrompt) return;
+
     const kb = keys.current;
     const k = {
       forward:  kb.forward  || mobileKeys.forward,

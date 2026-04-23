@@ -12,6 +12,7 @@ import { GameOverScreen } from "./GameOverScreen";
 import { useGameStore } from "./useGameStore";
 import { stopSuction } from "./audio";
 import { MobileControls } from "./MobileControls";
+import { PortalPrompt } from "./PortalPrompt";
 
 export const Game = () => {
   const playerRef = useRef({ x: 0, z: 5, yaw: Math.PI });
@@ -71,6 +72,7 @@ export const Game = () => {
       />
 
       <HUD />
+      <PortalPrompt />
       <MobileControls onRestart={() => useGameStore.getState().reset()} />
       <StartScreen />
       <CompleteScreen />

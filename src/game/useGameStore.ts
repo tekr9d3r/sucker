@@ -17,6 +17,9 @@ interface GameState {
   lastScoreId: number | null;
   setPlayerName: (name: string) => void;
   setLastScoreId: (id: number | null) => void;
+  // Portal prompt — set when player is near a portal, cleared on dismiss
+  portalPrompt: { url: string; label: string } | null;
+  setPortalPrompt: (p: { url: string; label: string } | null) => void;
   // Mini-map state
   playerX: number;
   playerZ: number;
@@ -71,6 +74,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   cellsVersion: 0,
   playerName: loadName(),
   lastScoreId: null,
+  portalPrompt: null,
+  setPortalPrompt: (p) => set({ portalPrompt: p }),
   setPlayerName: (name) => {
     if (typeof window !== "undefined") window.localStorage.setItem(NAME_KEY, name);
     set({ playerName: name });
