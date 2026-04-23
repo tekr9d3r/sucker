@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Game } from "@/game/Game";
+
+// useLayoutEffect fires synchronously before the browser paints on the client.
+// Falls back to useEffect on the server (where layout effects never run anyway).
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -24,16 +29,22 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // Render Game on both server and client (no hydration mismatch).
+  // A same-colour cover div sits on top and is removed before the first
+  // browser paint via useLayoutEffect — the user goes straight to the
+  // start screen with no visible flash or blank frame.
+  const [cover, setCover] = useState(true);
+  useIsomorphicLayoutEffect(() => setCover(false), []);
 
-  if (!mounted) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-white/60 text-sm tracking-widest uppercase">
-        Loading…
-      </div>
-    );
-  }
-
-  return <Game />;
+  return (
+    <>
+      <Game />
+      {cover && (
+        <div
+          className="fixed inset-0 pointer-events-none"
+          style={{ zIndex: 9999, background: "#1a1410" }}
+        />
+      )}
+    </>
+  );
 }
