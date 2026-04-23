@@ -939,21 +939,21 @@ interface WindowProps {
 const Window = ({ position, rotation, width, height, tex }: WindowProps) => {
   const halfW = width / 2;
   const halfH = height / 2;
-  // Magnify backdrop and pull it CLOSE to the glass so it reads as a tight,
-  // detailed view (less empty perspective).
-  const sceneScale = 1.6;
+  // Pull the backdrop far behind the glass so parallax kicks in as you move,
+  // and scale it up enough that edges are never visible from any angle in the room.
+  const sceneScale = 6;
   const sceneW = width * sceneScale;
   const sceneH = height * sceneScale;
   return (
     <group position={position} rotation={rotation}>
-      {/* Magnified city backdrop, tucked just behind the glass */}
-      <mesh position={[0, 0, -0.25]}>
+      {/* Backdrop — far outside the wall so it shifts with player movement */}
+      <mesh position={[0, 0, -4]}>
         <planeGeometry args={[sceneW, sceneH]} />
         <meshBasicMaterial map={tex} toneMapped={false} />
       </mesh>
-      {/* Sky-blue safety tint behind, in case backdrop edges peek */}
-      <mesh position={[0, 0, -0.45]}>
-        <planeGeometry args={[sceneW * 1.4, sceneH * 1.4]} />
+      {/* Sky fill behind backdrop so no gaps ever show */}
+      <mesh position={[0, 0, -4.5]}>
+        <planeGeometry args={[sceneW * 2, sceneH * 2]} />
         <meshBasicMaterial color="#b8d8ee" toneMapped={false} />
       </mesh>
       {/* Glass pane — slight blue tint, transparent, subtle reflection feel */}
